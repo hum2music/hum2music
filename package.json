@@ -1,0 +1,19 @@
+{
+  "name": "hum2music",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "tsc -b"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.7.0",
+    "@hum2music/core": "workspace:*",
+    "@hum2music/audio-analysis": "workspace:*",
+    "@hum2music/midi": "workspace:*"
+  }
+}
