@@ -1,5 +1,5 @@
 import { parseArgs } from "node:util";
-import { decodeWav, transcribeMelody } from "@hum2music/audio-analysis";
+import { decodeWav, reduceNoise, transcribeMelody } from "@hum2music/audio-analysis";
 import { analyzeHarmony, type TimedNote } from "@hum2music/harmony";
 import { humanizeMelody } from "@hum2music/expression";
 import { noteEventsToMidiNotes, writeStandardMidiFile } from "@hum2music/midi";
@@ -27,7 +27,8 @@ export async function runTranscribe(args: string[]): Promise<void> {
 
   const buffer = await Bun.file(inputPath).arrayBuffer();
   const { sampleRate, samples } = decodeWav(buffer);
-  const transcribedNotes = transcribeMelody(samples, sampleRate);
+  const denoisedSamples = reduceNoise(samples, sampleRate);
+  const transcribedNotes = transcribeMelody(denoisedSamples, sampleRate);
 
   if (transcribedNotes.length === 0) {
     console.error("No valid pitch could be detected in the input audio.");

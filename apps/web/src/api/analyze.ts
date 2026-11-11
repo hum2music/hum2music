@@ -1,6 +1,7 @@
 import {
   decodeWav,
   detectPitchYin,
+  reduceNoise,
   removePitchOutliers,
   smoothPitchTrajectory,
   transcribeMelody,
@@ -23,11 +24,13 @@ export async function handleAnalyze(request: Request): Promise<Response> {
     return jsonError(400, `Could not decode audio: ${(error as Error).message}`);
   }
 
+  const denoisedSamples = reduceNoise(samples, sampleRate);
+
   // Recomputes the pitch track for display (transcribeMelody runs the same
   // YIN pass internally) — a known inefficiency, acceptable for a local,
   // single-request preview endpoint. See tasks/STATUS.md.
-  const pitchCurve = smoothPitchTrajectory(removePitchOutliers(detectPitchYin(samples, sampleRate)));
-  const notes = transcribeMelody(samples, sampleRate);
+  const pitchCurve = smoothPitchTrajectory(removePitchOutliers(detectPitchYin(denoisedSamples, sampleRate)));
+  const notes = transcribeMelody(denoisedSamples, sampleRate);
 
   if (notes.length === 0) {
     return jsonError(422, "No valid pitch could be detected in the input audio.");

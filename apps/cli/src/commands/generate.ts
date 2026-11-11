@@ -5,7 +5,13 @@ import {
   type ArrangeableInstrument,
   type ComposedTrack,
 } from "@hum2music/arrangement";
-import { decodeWav, encodeWavPcm16, midiNoteToFrequency, transcribeMelody } from "@hum2music/audio-analysis";
+import {
+  decodeWav,
+  encodeWavPcm16,
+  midiNoteToFrequency,
+  reduceNoise,
+  transcribeMelody,
+} from "@hum2music/audio-analysis";
 import { analyzeHarmony, type TimedNote } from "@hum2music/harmony";
 import { noteEventsToMidiNotes, writeMultiTrackMidiFile, type MidiNoteEvent, type MidiTrack } from "@hum2music/midi";
 import {
@@ -45,7 +51,8 @@ export async function runGenerate(args: string[]): Promise<void> {
 
   const buffer = await Bun.file(inputPath).arrayBuffer();
   const { sampleRate, samples } = decodeWav(buffer);
-  const transcribedNotes = transcribeMelody(samples, sampleRate);
+  const denoisedSamples = reduceNoise(samples, sampleRate);
+  const transcribedNotes = transcribeMelody(denoisedSamples, sampleRate);
 
   if (transcribedNotes.length === 0) {
     console.error("No valid pitch could be detected in the input audio.");
