@@ -1,11 +1,28 @@
 {
   "name": "hum2music",
   "version": "0.1.0",
-  "private": true,
+  "description": "Turn a hummed melody into a multi-track MIDI/WAV song — no generative AI, a local, rule-based CLI built on music theory and signal processing.",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/hum2music/hum2music",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hum2music/hum2music.git",
+    "directory": "apps/cli"
+  },
+  "keywords": [
+    "midi",
+    "music",
+    "cli",
+    "humming",
+    "melody-transcription",
+    "music-theory",
+    "composition"
+  ],
   "type": "module",
   "bin": {
     "hum2music": "./src/index.ts"
   },
+  "files": ["src", "README.md"],
   "dependencies": {
     "@hum2music/audio-analysis": "workspace:*",
     "@hum2music/midi": "workspace:*",
