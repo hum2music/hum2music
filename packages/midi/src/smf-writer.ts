@@ -1,8 +1,14 @@
+export interface MidiPitchCurveSample {
+  offsetMs: number;
+  cents: number;
+}
+
 export interface MidiNoteEvent {
   pitch: number;
   startMs: number;
   durationMs: number;
   velocity: number;
+  pitchCurve?: MidiPitchCurveSample[];
 }
 
 export interface WriteSmfOptions {
@@ -64,13 +70,27 @@ function buildMelodyTrack(
 
   type TimedEvent = { tick: number; order: number; bytes: number[] };
   const events: TimedEvent[] = [];
+  let order = 0;
 
-  notes.forEach((note, index) => {
-    const startTick = Math.round(note.startMs * ticksPerMs);
+  for (const note of notes) {
+    // A note can't sound before the start of the file (e.g. humanization
+    // jitter nudging the very first note earlier than tick 0); clamp it.
+    const startTick = Math.max(0, Math.round(note.startMs * ticksPerMs));
     const endTick = Math.max(startTick + 1, Math.round((note.startMs + note.durationMs) * ticksPerMs));
-    events.push({ tick: startTick, order: index * 2, bytes: [0x90 | channel, note.pitch, clampVelocity(note.velocity)] });
-    events.push({ tick: endTick, order: index * 2 + 1, bytes: [0x80 | channel, note.pitch, 0] });
-  });
+
+    events.push({ tick: startTick, order: order++, bytes: [0x90 | channel, note.pitch, clampVelocity(note.velocity)] });
+
+    for (const sample of note.pitchCurve ?? []) {
+      const sampleTick = clampTick(Math.round((note.startMs + sample.offsetMs) * ticksPerMs), startTick, endTick - 1);
+      events.push({ tick: sampleTick, order: order++, bytes: buildPitchBendBytes(channel, sample.cents) });
+    }
+
+    events.push({ tick: endTick, order: order++, bytes: [0x80 | channel, note.pitch, 0] });
+
+    if (note.pitchCurve && note.pitchCurve.length > 0) {
+      events.push({ tick: endTick, order: order++, bytes: buildPitchBendBytes(channel, 0) });
+    }
+  }
 
   events.sort((a, b) => a.tick - b.tick || a.order - b.order);
 
@@ -119,6 +139,17 @@ function encodeVariableLengthQuantity(value: number): number[] {
 
 function clampVelocity(velocity: number): number {
   return Math.min(127, Math.max(1, Math.round(velocity)));
+}
+
+function clampTick(tick: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, tick));
+}
+
+/** Pitch bend is a 14-bit value (0-16383, center 8192); the default bend range on most synths is +/-2 semitones (200 cents). */
+function buildPitchBendBytes(channel: number, cents: number, bendRangeCents = 200): number[] {
+  const normalized = Math.min(1, Math.max(-1, cents / bendRangeCents));
+  const value = Math.min(16383, Math.max(0, Math.round(8192 + normalized * 8192)));
+  return [0xe0 | channel, value & 0x7f, (value >> 7) & 0x7f];
 }
 
 function concatBytes(chunks: Uint8Array[]): Uint8Array {
