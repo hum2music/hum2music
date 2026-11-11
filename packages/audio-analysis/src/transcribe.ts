@@ -12,9 +12,9 @@ export interface TranscribedNote {
 }
 
 /**
- * Phase 0 pipeline: raw samples -> YIN pitch track -> outlier removal and
- * smoothing -> note segmentation -> integer MIDI notes ready for export.
- * There is no tempo/beat model yet (that's Phase 1), so timing stays in ms.
+ * Audio-to-melody transcription pipeline: raw samples -> YIN pitch track ->
+ * outlier removal and smoothing -> note segmentation -> integer MIDI notes
+ * ready for export. There is no tempo/beat model yet, so timing stays in ms.
  */
 export function transcribeMelody(samples: Float32Array, sampleRate: number): TranscribedNote[] {
   const rawFrames = detectPitchYin(samples, sampleRate);

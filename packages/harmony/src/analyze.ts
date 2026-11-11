@@ -14,7 +14,7 @@ export interface HarmonyAnalysis {
   chords: ChordEvent[];
 }
 
-/** Phase 1 pipeline: timed notes -> tempo/key candidates -> quantized melody -> chord progression. */
+/** Harmony analysis pipeline: timed notes -> tempo/key candidates -> quantized melody -> chord progression. */
 export function analyzeHarmony(notes: TimedNote[], overrideBpm?: number): HarmonyAnalysis {
   const tempoCandidates = estimateTempo(notes);
   const selectedBpm = overrideBpm ?? tempoCandidates[0]?.bpm ?? 120;

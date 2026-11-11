@@ -6,7 +6,7 @@ Rules for any coding agent (Claude Code, Codex, Cursor, etc.) working in this re
 
 Treat `PRD.md` as the authoritative product spec, and `./docs` as the implementation-level architecture/engineering detail. The development plan (staged build order, acceptance criteria, final-form target spec) lives in `./tasks` (private) as `ROADMAP.md` and `SPECIFICATION.md` — read those before starting new work. For exactly what is implemented right now (as opposed to planned), see `./tasks/STATUS.md` (private) — it is updated whenever implementation state changes and should be trusted over `./docs` for "does X exist yet".
 
-**Do not introduce staged/phase language (e.g. "Phase N", progress-percentage, "MVP milestone X") into anything in the public main repo or `./docs`** — that belongs exclusively in `./tasks`. This repo stays public before the project is publicly announced, so it must not reveal how far along development is; `./docs` describes architecture and how things work, not build order or current completeness.
+**Do not introduce internal build-stage labels, progress percentages, or milestone/roadmap language into anything in the public main repo or `./docs`** — that kind of planning detail belongs exclusively in `./tasks`. This repo stays public before the project is publicly announced, so it must not reveal how far along development is or what the staged build order is; `./docs` and source comments should describe what something does and how, not where it sits in an internal build sequence.
 
 This is a Bun workspace monorepo (`apps/*`, `packages/*`). Common commands:
 
