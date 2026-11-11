@@ -8,6 +8,8 @@ Treat `PRD.md` as the authoritative product spec, and `./docs` as the implementa
 
 **Do not introduce internal build-stage labels, progress percentages, or milestone/roadmap language into anything in the public main repo or `./docs`** — that kind of planning detail belongs exclusively in `./tasks`. This repo stays public before the project is publicly announced, so it must not reveal how far along development is or what the staged build order is; `./docs` and source comments should describe what something does and how, not where it sits in an internal build sequence.
 
+**This explicitly includes commit messages in `hum2music/hum2music` (and `hum2music/docs`) — subject AND body.** Never write the literal word "Phase" (e.g. "Phase 2", "Phase 2's MVP scope") in a commit there; it has leaked into history before and had to be scrubbed with `git filter-repo` + a force-push. Before committing in either public repo, re-read the full message you're about to use and check for "phase" (case-insensitive). Write what the change does instead, e.g. "the MVP arrangement scope" instead of "Phase 2's MVP arrangement scope", or "chore(tasks): update tasks submodule pointer" instead of "... for Phase 2 tracking". `hum2music/tasks` commits are exempt — phase language belongs there.
+
 This is a Bun workspace monorepo (`apps/*`, `packages/*`). Common commands:
 
 - `bun install` — install/link workspace packages
