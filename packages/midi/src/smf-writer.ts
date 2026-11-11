@@ -28,9 +28,35 @@ export function writeStandardMidiFile(notes: MidiNoteEvent[], options: WriteSmfO
 
   const header = buildHeaderChunk(1, 2, ppq);
   const tempoTrack = buildTempoTrack(microsecondsPerQuarter);
-  const melodyTrack = buildMelodyTrack(notes, ppq, microsecondsPerQuarter, channel);
+  const melodyTrack = buildNoteTrack(notes, ppq, microsecondsPerQuarter, channel);
 
   return concatBytes([header, tempoTrack, melodyTrack]);
+}
+
+export interface MidiTrack {
+  notes: MidiNoteEvent[];
+  /** MIDI channel (0-15). Defaults to the track's index; use 9 for GM percussion. */
+  channel?: number;
+  /** General MIDI program number (0-127). Omit for channel 9 (percussion uses the GM drum map instead). */
+  programNumber?: number;
+}
+
+/**
+ * Writes one tempo/metadata track plus one note track per entry in
+ * `tracks`, in order (e.g. melody, piano, bass, drums per PRD §13.1).
+ */
+export function writeMultiTrackMidiFile(tracks: MidiTrack[], options: WriteSmfOptions = {}): Uint8Array {
+  const ppq = options.ppq ?? DEFAULT_PPQ;
+  const bpm = options.bpm ?? DEFAULT_BPM;
+  const microsecondsPerQuarter = Math.round(60_000_000 / bpm);
+
+  const header = buildHeaderChunk(1, 1 + tracks.length, ppq);
+  const tempoTrack = buildTempoTrack(microsecondsPerQuarter);
+  const noteTracks = tracks.map((track, index) =>
+    buildNoteTrack(track.notes, ppq, microsecondsPerQuarter, track.channel ?? index, track.programNumber),
+  );
+
+  return concatBytes([header, tempoTrack, ...noteTracks]);
 }
 
 function buildHeaderChunk(format: number, numTracks: number, ppq: number): Uint8Array {
@@ -59,11 +85,12 @@ function buildTempoTrack(microsecondsPerQuarter: number): Uint8Array {
   return wrapTrackChunk(new Uint8Array([...tempoEvent, ...timeSignatureEvent, ...endOfTrack]));
 }
 
-function buildMelodyTrack(
+function buildNoteTrack(
   notes: MidiNoteEvent[],
   ppq: number,
   microsecondsPerQuarter: number,
   channel: number,
+  programNumber?: number,
 ): Uint8Array {
   const msPerQuarter = microsecondsPerQuarter / 1000;
   const ticksPerMs = ppq / msPerQuarter;
@@ -71,6 +98,10 @@ function buildMelodyTrack(
   type TimedEvent = { tick: number; order: number; bytes: number[] };
   const events: TimedEvent[] = [];
   let order = 0;
+
+  if (programNumber !== undefined) {
+    events.push({ tick: 0, order: order++, bytes: [0xc0 | channel, programNumber & 0x7f] });
+  }
 
   for (const note of notes) {
     // A note can't sound before the start of the file (e.g. humanization
