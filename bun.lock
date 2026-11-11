@@ -7,7 +7,9 @@
       "devDependencies": {
         "@hum2music/audio-analysis": "workspace:*",
         "@hum2music/core": "workspace:*",
+        "@hum2music/harmony": "workspace:*",
         "@hum2music/midi": "workspace:*",
+        "@hum2music/music-theory": "workspace:*",
         "@types/bun": "latest",
         "typescript": "^5.7.0",
       },
@@ -20,6 +22,7 @@
       },
       "dependencies": {
         "@hum2music/audio-analysis": "workspace:*",
+        "@hum2music/harmony": "workspace:*",
         "@hum2music/midi": "workspace:*",
       },
     },
@@ -34,8 +37,20 @@
       "name": "@hum2music/core",
       "version": "0.1.0",
     },
+    "packages/harmony": {
+      "name": "@hum2music/harmony",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hum2music/core": "workspace:*",
+        "@hum2music/music-theory": "workspace:*",
+      },
+    },
     "packages/midi": {
       "name": "@hum2music/midi",
+      "version": "0.1.0",
+    },
+    "packages/music-theory": {
+      "name": "@hum2music/music-theory",
       "version": "0.1.0",
     },
   },
@@ -44,7 +59,11 @@
 
     "@hum2music/core": ["@hum2music/core@workspace:packages/core"],
 
+    "@hum2music/harmony": ["@hum2music/harmony@workspace:packages/harmony"],
+
     "@hum2music/midi": ["@hum2music/midi@workspace:packages/midi"],
+
+    "@hum2music/music-theory": ["@hum2music/music-theory@workspace:packages/music-theory"],
 
     "@types/bun": ["@types/bun@1.4.4", "https://npm.flatt.tech/@types/bun/-/bun-1.4.4.tgz", { "dependencies": { "bun-types": "1.4.4" } }, "sha512-9wkRDXUXK124pEnAutE6n/l18j+i9GC5IAHK8TmX/2nlySETmky0OU6yL5U8pW1AoKh++AN9auDCr647BfurjQ=="],
 

@@ -2,8 +2,10 @@
   "files": [],
   "references": [
     { "path": "./packages/core" },
+    { "path": "./packages/music-theory" },
     { "path": "./packages/audio-analysis" },
     { "path": "./packages/midi" },
+    { "path": "./packages/harmony" },
     { "path": "./apps/cli" }
   ]
 }

@@ -14,6 +14,8 @@
     "typescript": "^5.7.0",
     "@hum2music/core": "workspace:*",
     "@hum2music/audio-analysis": "workspace:*",
-    "@hum2music/midi": "workspace:*"
+    "@hum2music/midi": "workspace:*",
+    "@hum2music/music-theory": "workspace:*",
+    "@hum2music/harmony": "workspace:*"
   }
 }
