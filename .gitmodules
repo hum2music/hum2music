@@ -22,3 +22,6 @@
 [submodule "packages/harmony"]
 	path = packages/harmony
 	url = https://github.com/hum2music/harmony
+[submodule "packages/rendering"]
+	path = packages/rendering
+	url = https://github.com/hum2music/rendering
