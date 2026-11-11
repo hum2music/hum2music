@@ -1,0 +1,3 @@
+# hum2music_tasks is a separately managed private repo cloned here for local
+# task tracking; it must never be tracked or embedded as a gitlink in this repo.
+/tasks/
