@@ -1,0 +1,13 @@
+{
+  "name": "hum2music",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "hum2music": "./src/index.ts"
+  },
+  "dependencies": {
+    "@hum2music/audio-analysis": "workspace:*",
+    "@hum2music/midi": "workspace:*"
+  }
+}
