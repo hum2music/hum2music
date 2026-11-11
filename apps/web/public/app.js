@@ -102,11 +102,18 @@ function initUI() {
     mediaRecorder.addEventListener("dataavailable", (event) => recordedChunks.push(event.data));
     mediaRecorder.addEventListener("stop", async () => {
       recordStatus.textContent = "解析中...";
-      const blob = new Blob(recordedChunks, { type: mediaRecorder.mimeType });
-      const wavBlob = await decodeToWavBlob(await blob.arrayBuffer());
-      await analyze(wavBlob);
-      stream.getTracks().forEach((track) => track.stop());
-      recordButton.textContent = "マイク録音開始";
+      try {
+        const blob = new Blob(recordedChunks, { type: mediaRecorder.mimeType });
+        const wavBlob = await decodeToWavBlob(await blob.arrayBuffer());
+        const succeeded = await analyze(wavBlob);
+        recordStatus.textContent = succeeded ? "解析完了" : "解析に失敗しました";
+      } catch (error) {
+        recordStatus.textContent = "解析に失敗しました";
+        throw error;
+      } finally {
+        stream.getTracks().forEach((track) => track.stop());
+        recordButton.textContent = "マイク録音開始";
+      }
     });
 
     mediaRecorder.start();
@@ -163,7 +170,7 @@ function initUI() {
     if (!response.ok) {
       const body = await response.json().catch(() => ({ error: response.statusText }));
       alert(`解析に失敗しました: ${body.error ?? response.statusText}`);
-      return;
+      return false;
     }
 
     lastAnalysis = await response.json();
@@ -173,6 +180,7 @@ function initUI() {
     analysisSection.hidden = false;
     arrangementSection.hidden = false;
     exportSection.hidden = false;
+    return true;
   }
 
   function renderAnalysis(analysis) {
