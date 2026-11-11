@@ -13,13 +13,19 @@ export interface NoteCandidate {
   onsetConfidence: number;
 }
 
+/** One sample of a note's pitch deviation from its nominal pitch, in cents, at a time offset from note-on. */
+export interface PitchCurveSample {
+  offsetMs: number;
+  cents: number;
+}
+
 export interface NoteEvent {
   pitch: number;
   startBeat: number;
   durationBeats: number;
   velocity: number;
   expression?: {
-    pitchCurve?: number[];
+    pitchCurve?: PitchCurveSample[];
     timingOffsetMs?: number;
   };
 }
