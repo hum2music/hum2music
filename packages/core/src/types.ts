@@ -24,6 +24,18 @@ export interface NoteEvent {
   };
 }
 
+export interface TempoCandidate {
+  bpm: number;
+  confidence: number;
+  isHalfOrDoubleOf?: number;
+}
+
+export interface KeyCandidate {
+  tonic: string;
+  mode: "major" | "minor";
+  confidence: number;
+}
+
 export interface ChordEvent {
   symbol: string;
   startBeat: number;
