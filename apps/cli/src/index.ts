@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
 import { runAnalyze } from "./commands/analyze";
+import { runGenerate } from "./commands/generate";
 import { runServe } from "./commands/serve";
 import { runTranscribe } from "./commands/transcribe";
 
@@ -12,6 +13,9 @@ async function main() {
       return;
     case "analyze":
       await runAnalyze(rest);
+      return;
+    case "generate":
+      await runGenerate(rest);
       return;
     case "serve":
       await runServe(rest);
