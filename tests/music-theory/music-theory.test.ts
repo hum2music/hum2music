@@ -1,8 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import {
+  CHORD_QUALITIES,
   chordPitchClasses,
   chordSymbol,
   isDiatonic,
+  parseChordSymbol,
   pitchClassDistance,
   pitchClassOf,
   scalePitchClasses,
@@ -38,6 +40,29 @@ describe("chordPitchClasses / chordSymbol", () => {
   test("G dominant 7th", () => {
     expect(chordPitchClasses(7, "dominant7").sort((a, b) => a - b)).toEqual([2, 5, 7, 11]);
     expect(chordSymbol(7, "dominant7")).toBe("G7");
+  });
+});
+
+describe("parseChordSymbol", () => {
+  test("is the exact inverse of chordSymbol for every root/quality", () => {
+    for (let root = 0; root < 12; root++) {
+      for (const quality of CHORD_QUALITIES) {
+        const symbol = chordSymbol(root, quality);
+        expect(parseChordSymbol(symbol)).toEqual({ root, quality });
+      }
+    }
+  });
+
+  test("handles flats, sharps, and minor7 vs. minor correctly", () => {
+    expect(parseChordSymbol("Bb")).toEqual({ root: 10, quality: "major" });
+    expect(parseChordSymbol("F#m")).toEqual({ root: 6, quality: "minor" });
+    expect(parseChordSymbol("Dm7")).toEqual({ root: 2, quality: "minor7" });
+    expect(parseChordSymbol("Cmaj7")).toEqual({ root: 0, quality: "major7" });
+  });
+
+  test("returns null for an unparseable symbol", () => {
+    expect(parseChordSymbol("Hm")).toBeNull();
+    expect(parseChordSymbol("Cadd9")).toBeNull();
   });
 });
 

@@ -41,3 +41,40 @@ export function chordPitchClasses(root: number, quality: ChordQuality): number[]
 export function chordSymbol(root: number, quality: ChordQuality): string {
   return `${NOTE_NAMES[pitchClassOf(root)]}${QUALITY_SUFFIX[quality]}`;
 }
+
+const PITCH_CLASS_BY_NOTE_NAME: Record<string, number> = {
+  C: 0,
+  "C#": 1,
+  Db: 1,
+  D: 2,
+  "D#": 3,
+  Eb: 3,
+  E: 4,
+  F: 5,
+  "F#": 6,
+  Gb: 6,
+  G: 7,
+  "G#": 8,
+  Ab: 8,
+  A: 9,
+  "A#": 10,
+  Bb: 10,
+  B: 11,
+};
+
+const QUALITY_BY_SUFFIX: Record<string, ChordQuality> = Object.fromEntries(
+  CHORD_QUALITIES.map((quality) => [QUALITY_SUFFIX[quality], quality]),
+);
+
+/** Inverse of chordSymbol; returns null for a symbol this chord-type set can't represent (e.g. an unsupported suffix). */
+export function parseChordSymbol(symbol: string): { root: number; quality: ChordQuality } | null {
+  const match = symbol.trim().match(/^([A-G][#b]?)(.*)$/);
+  if (!match) return null;
+
+  const [, rootName, suffix] = match;
+  const root = PITCH_CLASS_BY_NOTE_NAME[rootName];
+  const quality = QUALITY_BY_SUFFIX[suffix];
+  if (root === undefined || quality === undefined) return null;
+
+  return { root, quality };
+}
