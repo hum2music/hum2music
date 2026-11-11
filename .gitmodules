@@ -7,3 +7,6 @@
 [submodule "packages/core"]
 	path = packages/core
 	url = https://github.com/hum2music/core
+[submodule "packages/music-theory"]
+	path = packages/music-theory
+	url = https://github.com/hum2music/music-theory
