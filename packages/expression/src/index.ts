@@ -4,4 +4,5 @@ export * from "./timing";
 export * from "./dynamics";
 export * from "./pitch";
 export * from "./drum-humanization";
+export * from "./groove";
 export * from "./humanize";
