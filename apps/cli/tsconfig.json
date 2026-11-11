@@ -8,6 +8,7 @@
   "references": [
     { "path": "../../packages/audio-analysis" },
     { "path": "../../packages/midi" },
-    { "path": "../../packages/harmony" }
+    { "path": "../../packages/harmony" },
+    { "path": "../../packages/expression" }
   ]
 }
