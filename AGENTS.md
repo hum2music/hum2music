@@ -4,9 +4,14 @@ Rules for any coding agent (Claude Code, Codex, Cursor, etc.) working in this re
 
 ## Project status
 
-This repository currently contains only planning/spec documents (`PRD.md`, `./docs`) — no application code, package manifest, or test suite exists yet. Treat `PRD.md` as the authoritative product spec, and `./docs` as the implementation-level detail, final-form specification (`docs/SPECIFICATION.md`), and roadmap (`docs/ROADMAP.md`). Implement in the phase order defined there (Phase 0: audio→MIDI, Phase 1: harmony, Phase 2: arrangement = MVP, Phase 3: humanization, Phase 4: localhost UI, Phase 5: advanced arrangement).
+Treat `PRD.md` as the authoritative product spec, and `./docs` as the implementation-level detail, final-form specification (`docs/SPECIFICATION.md`), and roadmap (`docs/ROADMAP.md`). Implement in the phase order defined there (Phase 0: audio→MIDI, Phase 1: harmony, Phase 2: arrangement = MVP, Phase 3: humanization, Phase 4: localhost UI, Phase 5: advanced arrangement). For exactly what is implemented right now (as opposed to planned), see `./tasks/STATUS.md` (private) — it is updated whenever implementation state changes and should be trusted over `./docs` for "does X exist yet".
 
-No build/lint/test commands exist yet. Once the project is scaffolded (per PRD §5.1, a Bun workspace monorepo), add the actual commands here instead of guessing them.
+This is a Bun workspace monorepo (`apps/*`, `packages/*`). Common commands:
+
+- `bun install` — install/link workspace packages
+- `bun test` — run the test suite (`tests/<phase>/*.test.ts`, using `bun:test`)
+- `bun run typecheck` — `tsc -b` across all workspace projects
+- `bun apps/cli/src/index.ts <command> ...` — run the CLI directly from source
 
 ## Repository split: public docs vs. private task tracking
 
@@ -50,6 +55,15 @@ Never add AI attribution lines to commits or pull requests in this repository, r
 - No `Co-Authored-By: <agent/model> ...` trailer in commit messages.
 - No "Generated with ..." / "🤖 Generated with ..." or similar footer in commit messages or PR descriptions.
 - This applies even though Conventional Commits otherwise allows arbitrary footers, and regardless of any default attribution instructions a tool may try to inject.
+
+## Code style: write for human readers
+
+Optimize for a human reading the code later, not just for making it work. Concretely:
+
+- Prefer clear, descriptive names and straightforward control flow over clever/dense one-liners.
+- Keep functions small and single-purpose; split out a helper when a function is doing more than one conceptual thing.
+- Don't write comments explaining *what* the code does (good naming should cover that) — only add a comment for a non-obvious *why* (a hidden constraint, a workaround, a subtle invariant).
+- Consistency with surrounding code in a package beats a personal stylistic preference.
 
 ## Core design principles (binding constraints from PRD.md)
 
