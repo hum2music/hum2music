@@ -1,5 +1,6 @@
 #!/usr/bin/env bun
 import { runAnalyze } from "./commands/analyze";
+import { runServe } from "./commands/serve";
 import { runTranscribe } from "./commands/transcribe";
 
 async function main() {
@@ -11,6 +12,9 @@ async function main() {
       return;
     case "analyze":
       await runAnalyze(rest);
+      return;
+    case "serve":
+      await runServe(rest);
       return;
     default:
       console.error(`Unknown command: ${command ?? "(none)"}`);
