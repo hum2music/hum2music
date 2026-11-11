@@ -4,3 +4,6 @@
 [submodule "tasks"]
 	path = tasks
 	url = https://github.com/hum2music/tasks
+[submodule "packages/core"]
+	path = packages/core
+	url = https://github.com/hum2music/core
