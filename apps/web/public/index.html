@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hum2Music</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <h1>Hum2Music</h1>
+    <p class="note">
+      鼻歌から抽出したメロディーのプレビューです。現時点では楽器編曲（ピアノ/ベース/ドラム）は未実装のため、
+      メロディートラックのみを扱います。
+    </p>
+
+    <section id="input-section">
+      <h2>Input</h2>
+      <label>WAVファイルを選択: <input type="file" id="file-input" accept="audio/*" /></label>
+      <button id="record-button" type="button">マイク録音開始</button>
+      <span id="record-status"></span>
+    </section>
+
+    <section id="analysis-section" hidden>
+      <h2>Analysis</h2>
+      <canvas id="pitch-canvas" width="800" height="200"></canvas>
+      <p><strong>BPM候補:</strong> <span id="tempo-candidates"></span></p>
+      <p><strong>調性候補:</strong> <span id="key-candidates"></span></p>
+      <p><strong>コード進行:</strong> <span id="chord-progression"></span></p>
+      <p id="notes-summary"></p>
+    </section>
+
+    <section id="arrangement-section" hidden>
+      <h2>Arrangement</h2>
+      <label>
+        Humanize: <input type="range" id="humanize-slider" min="0" max="1" step="0.05" value="0" />
+        <span id="humanize-value">0</span>
+      </label>
+      <label>Seed: <input type="number" id="seed-input" value="42" /></label>
+      <button id="regenerate-button" type="button">再生成</button>
+    </section>
+
+    <section id="export-section" hidden>
+      <h2>Export</h2>
+      <button id="download-midi-button" type="button">MIDIダウンロード</button>
+      <button id="download-json-button" type="button">JSONダウンロード</button>
+    </section>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

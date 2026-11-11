@@ -1,0 +1,14 @@
+{
+  "name": "@hum2music/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "dependencies": {
+    "@hum2music/audio-analysis": "workspace:*",
+    "@hum2music/harmony": "workspace:*",
+    "@hum2music/expression": "workspace:*",
+    "@hum2music/midi": "workspace:*"
+  }
+}

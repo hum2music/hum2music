@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src"
+  },
+  "include": ["src"],
+  "references": [
+    { "path": "../../packages/audio-analysis" },
+    { "path": "../../packages/harmony" },
+    { "path": "../../packages/expression" },
+    { "path": "../../packages/midi" }
+  ]
+}
