@@ -36,12 +36,22 @@
         <label><input type="checkbox" class="instrument-toggle" value="piano" checked /> Piano</label>
         <label><input type="checkbox" class="instrument-toggle" value="bass" checked /> Bass</label>
         <label><input type="checkbox" class="instrument-toggle" value="drums" checked /> Drums</label>
+        <label><input type="checkbox" class="instrument-toggle" value="guitar" checked /> Guitar</label>
       </fieldset>
 
       <fieldset>
         <legend>コード進行（編集可）</legend>
         <div id="chord-editor"></div>
       </fieldset>
+
+      <label>
+        Style:
+        <select id="style-select">
+          <option value="pop">Pop</option>
+          <option value="ballad">Ballad</option>
+        </select>
+      </label>
+      <label><input type="checkbox" id="song-structure-checkbox" /> 曲構造に応じてグルーヴを変化させる</label>
 
       <label>
         Humanize: <input type="range" id="humanize-slider" min="0" max="1" step="0.05" value="0" />

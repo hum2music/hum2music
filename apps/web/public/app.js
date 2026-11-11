@@ -68,6 +68,8 @@ function initUI() {
   const notesSummaryEl = document.getElementById("notes-summary");
   const chordEditorEl = document.getElementById("chord-editor");
   const instrumentToggles = Array.from(document.querySelectorAll(".instrument-toggle"));
+  const styleSelect = document.getElementById("style-select");
+  const songStructureCheckbox = document.getElementById("song-structure-checkbox");
   const humanizeSlider = document.getElementById("humanize-slider");
   const humanizeValueEl = document.getElementById("humanize-value");
   const seedInput = document.getElementById("seed-input");
@@ -251,6 +253,8 @@ function initUI() {
       notes: lastAnalysis.notes,
       chords: currentChords,
       instruments: selectedInstruments(),
+      style: styleSelect.value,
+      songStructure: songStructureCheckbox.checked,
       humanize: Number(humanizeSlider.value),
       seed: Number(seedInput.value),
       bpm: lastAnalysis.selectedBpm,

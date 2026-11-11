@@ -1,5 +1,11 @@
 import { encodeWavPcm16, midiNoteToFrequency } from "@hum2music/audio-analysis";
-import { classifyDrumNote, renderToSamples, type DrumRenderNote, type PitchedRenderNote } from "@hum2music/rendering";
+import {
+  classifyDrumNote,
+  renderToSamples,
+  type DrumRenderNote,
+  type PitchedRenderNote,
+  type Timbre,
+} from "@hum2music/rendering";
 import { jsonError, resolveComposition, type ExportRequestBody } from "./shared";
 
 export async function handleExportWav(request: Request): Promise<Response> {
@@ -29,12 +35,14 @@ export async function handleExportWav(request: Request): Promise<Response> {
         });
       }
     } else {
+      const timbre = track.instrument as Timbre;
       for (const note of track.notes) {
         pitchedNotes.push({
           startMs: note.startMs,
           durationMs: note.durationMs,
           velocity: note.velocity,
           frequencyHz: midiNoteToFrequency(note.pitch),
+          timbre,
         });
       }
     }

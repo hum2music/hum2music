@@ -22,6 +22,10 @@ export interface ExportRequestBody {
   humanize?: number;
   seed?: number;
   bpm?: number;
+  /** "pop" (default) or "ballad"; see packages/arrangement/src/style.ts. */
+  style?: string;
+  /** When true, humanize intensity varies by detected repeated section instead of staying flat. */
+  songStructure?: boolean;
 }
 
 export interface ResolvedTrack {
@@ -69,7 +73,7 @@ export function resolveComposition(body: ExportRequestBody): { tracks: ResolvedT
     durationMs: note.durationMs,
     velocity: note.velocity,
   }));
-  const harmony = analyzeHarmony(timedNotes, body.bpm);
+  const harmony = analyzeHarmony(timedNotes, { overrideBpm: body.bpm });
   const bpm = harmony.selectedBpm;
 
   const composed = composeTracks({
@@ -79,6 +83,8 @@ export function resolveComposition(body: ExportRequestBody): { tracks: ResolvedT
     humanizeAmount,
     seed,
     bpm,
+    style: body.style,
+    songSections: body.songStructure ? harmony.songSections : undefined,
   });
 
   const tracks: ResolvedTrack[] = composed.map((track) => ({
