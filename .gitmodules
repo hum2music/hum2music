@@ -16,3 +16,6 @@
 [submodule "packages/expression"]
 	path = packages/expression
 	url = https://github.com/hum2music/expression
+[submodule "packages/midi"]
+	path = packages/midi
+	url = https://github.com/hum2music/midi
