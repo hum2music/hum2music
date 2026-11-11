@@ -4,18 +4,26 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project status
 
-This repository currently contains only planning documents (`PRD.md`) — no application code, package manifest, or test suite exists yet. Treat `PRD.md` as the authoritative spec: it defines the product concept, scope (P0/P1 features), planned monorepo layout, data pipeline, algorithms, and the Phase 0–5 build order. Read it before proposing architecture or starting implementation, and implement in the phase order it defines (Phase 0: audio→MIDI, Phase 1: harmony, Phase 2: arrangement = MVP, Phase 3: humanization, Phase 4: localhost UI, Phase 5: advanced arrangement).
+This repository currently contains only planning/spec documents (`PRD.md`, `./docs`) — no application code, package manifest, or test suite exists yet. Treat `PRD.md` as the authoritative product spec, and `./docs` (see below) as the implementation-level detail and roadmap. Implement in the phase order defined in `docs/ROADMAP.md` (Phase 0: audio→MIDI, Phase 1: harmony, Phase 2: arrangement = MVP, Phase 3: humanization, Phase 4: localhost UI, Phase 5: advanced arrangement).
 
 No build/lint/test commands exist yet. Once the project is scaffolded (per PRD §5.1, a Bun workspace monorepo), add the actual commands here instead of guessing them.
 
-## Repository split: public vs. private task tracking
+## Repository split: public docs vs. private task tracking
 
-This repo (`hum2music/hum2music`, org: `hum2music`) is **public** and holds product code and docs only. All task/progress management (issues, planning tickets) happens in the separate **private** repo `hum2music/tasks`, which is checked out locally at `./tasks/` as an independent nested git repository (its own `.git`, own remote — not a git submodule).
+This repo (`hum2music/hum2music`, org: `hum2music`) is **public** and holds product code plus `PRD.md`. Two other repos are mounted here as **git submodules**:
 
-- `./tasks/` is excluded via `.gitignore` in this repo specifically so it never gets tracked or accidentally committed as an embedded gitlink.
-- Git operations for task tracking must be run with cwd inside `./tasks/`, not the top-level repo.
-- When asked to create/manage issues, progress notes, or anything task-related, use `gh issue ... --repo hum2music/tasks` (or operate inside `./tasks/`), never the main repo.
-- Code, architecture decisions, and anything meant to be publicly visible belongs in the main repo; anything internal (roadmap detail, task breakdowns, non-public notes) belongs in `hum2music/tasks`.
+- `./docs` → [hum2music/docs](https://github.com/hum2music/docs) (public) — detailed engineering specs and `ROADMAP.md`, expanding on `PRD.md`.
+- `./tasks` → [hum2music/tasks](https://github.com/hum2music/tasks) (**private**) — all task/progress management (issues, planning tickets, internal breakdowns).
+
+Both are real git submodules (`.gitmodules` at repo root), not plain nested clones — when editing their content, commit and push from inside `./docs` or `./tasks` respectively, then stage the updated gitlink in the superproject.
+
+- Code and anything meant to be publicly visible belongs in the main repo or `./docs`.
+- When asked to create/manage issues or anything task-related, use `gh issue ... --repo hum2music/tasks` (or operate inside `./tasks/`), never the main repo.
+- Internal-only content (roadmap *execution* detail, task breakdowns, non-public notes) belongs in `hum2music/tasks`, not `./docs` (which is public).
+
+## Commit frequency
+
+Commit early and often in small, logical increments rather than batching unrelated work into one large commit. Don't wait for a whole feature/phase to be "done" before committing — commit each coherent step as you go. This applies to the main repo and to `./docs`/`./tasks` individually.
 
 ## Core design principles (binding constraints from PRD.md)
 
