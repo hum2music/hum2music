@@ -5,12 +5,14 @@
     "": {
       "name": "hum2music",
       "devDependencies": {
+        "@hum2music/arrangement": "workspace:*",
         "@hum2music/audio-analysis": "workspace:*",
         "@hum2music/core": "workspace:*",
         "@hum2music/expression": "workspace:*",
         "@hum2music/harmony": "workspace:*",
         "@hum2music/midi": "workspace:*",
         "@hum2music/music-theory": "workspace:*",
+        "@hum2music/rendering": "workspace:*",
         "@hum2music/web": "workspace:*",
         "@types/bun": "latest",
         "typescript": "^5.7.0",
@@ -23,10 +25,12 @@
         "hum2music": "./src/index.ts",
       },
       "dependencies": {
+        "@hum2music/arrangement": "workspace:*",
         "@hum2music/audio-analysis": "workspace:*",
         "@hum2music/expression": "workspace:*",
         "@hum2music/harmony": "workspace:*",
         "@hum2music/midi": "workspace:*",
+        "@hum2music/rendering": "workspace:*",
         "@hum2music/web": "workspace:*",
       },
     },
@@ -34,10 +38,21 @@
       "name": "@hum2music/web",
       "version": "0.1.0",
       "dependencies": {
+        "@hum2music/arrangement": "workspace:*",
         "@hum2music/audio-analysis": "workspace:*",
         "@hum2music/expression": "workspace:*",
         "@hum2music/harmony": "workspace:*",
         "@hum2music/midi": "workspace:*",
+        "@hum2music/rendering": "workspace:*",
+      },
+    },
+    "packages/arrangement": {
+      "name": "@hum2music/arrangement",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hum2music/core": "workspace:*",
+        "@hum2music/expression": "workspace:*",
+        "@hum2music/music-theory": "workspace:*",
       },
     },
     "packages/audio-analysis": {
@@ -77,8 +92,17 @@
       "name": "@hum2music/music-theory",
       "version": "0.1.0",
     },
+    "packages/rendering": {
+      "name": "@hum2music/rendering",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hum2music/expression": "workspace:*",
+      },
+    },
   },
   "packages": {
+    "@hum2music/arrangement": ["@hum2music/arrangement@workspace:packages/arrangement"],
+
     "@hum2music/audio-analysis": ["@hum2music/audio-analysis@workspace:packages/audio-analysis"],
 
     "@hum2music/core": ["@hum2music/core@workspace:packages/core"],
@@ -90,6 +114,8 @@
     "@hum2music/midi": ["@hum2music/midi@workspace:packages/midi"],
 
     "@hum2music/music-theory": ["@hum2music/music-theory@workspace:packages/music-theory"],
+
+    "@hum2music/rendering": ["@hum2music/rendering@workspace:packages/rendering"],
 
     "@hum2music/web": ["@hum2music/web@workspace:apps/web"],
 

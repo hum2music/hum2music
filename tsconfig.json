@@ -7,6 +7,8 @@
     { "path": "./packages/midi" },
     { "path": "./packages/harmony" },
     { "path": "./packages/expression" },
+    { "path": "./packages/arrangement" },
+    { "path": "./packages/rendering" },
     { "path": "./apps/web" },
     { "path": "./apps/cli" }
   ]
