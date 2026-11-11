@@ -6,6 +6,7 @@
     { "path": "./packages/audio-analysis" },
     { "path": "./packages/midi" },
     { "path": "./packages/harmony" },
+    { "path": "./packages/expression" },
     { "path": "./apps/cli" }
   ]
 }

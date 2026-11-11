@@ -32,6 +32,35 @@ describe("hum2music transcribe (CLI)", () => {
     }
   }, 20000);
 
+  test("--humanize/--seed produces a deterministic, valid SMF", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "hum2music-cli-"));
+    const inputPath = join(dir, "scale.wav");
+    const outputA = join(dir, "a.mid");
+    const outputB = join(dir, "b.mid");
+
+    try {
+      const samples = generateScale(C_MAJOR_SCALE_HZ, 0.3, 0.08, 44100);
+      await Bun.write(inputPath, encodeWavPcm16(samples, 44100));
+
+      for (const outputPath of [outputA, outputB]) {
+        const proc = Bun.spawn(
+          ["bun", CLI_ENTRY, "transcribe", inputPath, "-o", outputPath, "--humanize", "0.7", "--seed", "42"],
+          { stdout: "pipe", stderr: "pipe" },
+        );
+        expect(await proc.exited).toBe(0);
+      }
+
+      const bytesA = new Uint8Array(await Bun.file(outputA).arrayBuffer());
+      const bytesB = new Uint8Array(await Bun.file(outputB).arrayBuffer());
+      expect(bytesB).toEqual(bytesA);
+
+      const view = new DataView(bytesA.buffer, bytesA.byteOffset, bytesA.byteLength);
+      expect(readAscii(view, 0, 4)).toBe("MThd");
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  }, 20000);
+
   test("fails with a clear error when no pitch can be detected", async () => {
     const dir = await mkdtemp(join(tmpdir(), "hum2music-cli-"));
     const inputPath = join(dir, "silence.wav");

@@ -44,6 +44,19 @@ describe("writeStandardMidiFile", () => {
     const bytes = writeStandardMidiFile([{ pitch: 60, startMs: 100, durationMs: -50, velocity: 90 }]);
     expect(bytes.length).toBeGreaterThan(0);
   });
+
+  test("clamps a note starting before time zero instead of throwing", () => {
+    // Can happen when humanization timing jitter nudges the very first note earlier than tick 0.
+    const bytes = writeStandardMidiFile([{ pitch: 60, startMs: -5, durationMs: 300, velocity: 90 }]);
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+
+    const track0Length = view.getUint32(14 + 4, false);
+    const track1Offset = 14 + 8 + track0Length;
+    const track1Length = view.getUint32(track1Offset + 4, false);
+    const trackData = bytes.subarray(track1Offset + 8, track1Offset + 8 + track1Length);
+
+    expect(Array.from(trackData.subarray(0, 4))).toEqual([0x00, 0x90, 60, 90]);
+  });
 });
 
 function readAscii(view: DataView, offset: number, length: number): string {
