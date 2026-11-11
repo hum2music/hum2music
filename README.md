@@ -10,13 +10,10 @@ Hum2Musicは、ユーザーが入力した鼻歌からメロディーを抽出�
 
 楽譜を読めない人でも、鼻歌だけで楽曲制作を始められることを目指します。
 
-## 現在のステータス
+## ドキュメント
 
-**計画段階（Pre-implementation）。** アプリケーションコードはまだ存在せず、製品要求・設計ドキュメントのみが揃っている状態です。
-
-- [PRD.md](./PRD.md) — プロダクト要求定義（コンセプト・スコープ・MVP要件・開発フェーズ）
-- [docs/](./docs) — 実装レベルの詳細仕様とロードマップ（git submodule、[hum2music/docs](https://github.com/hum2music/docs)）
-  - [docs/ROADMAP.md](https://github.com/hum2music/docs/blob/main/ROADMAP.md) — Phase 0〜5のタスク分解と進捗状況
+- [PRD.md](./PRD.md) — プロダクト要求定義（コンセプト・スコープ・MVP要件）
+- [docs/](./docs) — 実装レベルの詳細仕様（git submodule、[hum2music/docs](https://github.com/hum2music/docs)）
   - [docs/specs/](https://github.com/hum2music/docs/tree/main/specs) — 各エンジン（音響解析・和声・編曲・ドラム・表現・出力）の技術仕様
 
 ## プロダクト原則
@@ -31,20 +28,7 @@ Hum2Musicは、ユーザーが入力した鼻歌からメロディーを抽出�
 
 詳細は [PRD.md §1.3](./PRD.md#13-プロダクト原則) を参照してください。
 
-## 開発フェーズ
-
-| Phase | Goal | ステータス |
-|---|---|---|
-| 0 | 鼻歌のメロディーをMIDIに変換できる | 未着手 |
-| 1 | メロディーからコード進行を提案できる | 未着手 |
-| 2 | 1つの鼻歌から複数トラックの楽曲を生成できる（**P0 MVP**） | 未着手 |
-| 3 | 機械的な楽曲に自然な演奏表現を与える | 未着手 |
-| 4 | 鼻歌を録音して、その場で楽曲を確認できる（localhost UI） | 未着手 |
-| 5 | ギター編曲・複数スタイル等の高度な編曲 | 未着手 |
-
-完了条件の詳細は [PRD.md §17, §18](./PRD.md) および [docs/ROADMAP.md](https://github.com/hum2music/docs/blob/main/ROADMAP.md) を参照してください。
-
-## 技術スタック（予定）
+## 技術スタック
 
 - 言語：TypeScript
 - ランタイム：Bun（Node.js互換性も考慮）
@@ -55,19 +39,25 @@ Hum2Musicは、ユーザーが入力した鼻歌からメロディーを抽出�
 ```text
 hum2music/
 ├── PRD.md       # プロダクト要求定義（正）
-├── docs/        # 詳細仕様・ロードマップ（submodule, public）
-└── tasks/       # タスク・進捗管理（submodule, private — 社内/個人運用）
+├── apps/        # CLI / (将来) Web UI
+├── packages/    # 音響解析・音楽理論・和声・MIDI等の各パッケージ
+├── fixtures/    # テスト用の合成音声生成
+├── tests/       # 自動テスト
+├── docs/        # 詳細仕様（submodule, public）
+└── tasks/       # タスク・進捗管理（submodule, private）
 ```
 
 `docs`はsubmoduleのため、`git clone`時は `--recurse-submodules` を付けるか、クローン後に `git submodule update --init` を実行してください。`tasks`は非公開リポジトリのため、権限のない環境では取得できません（アプリケーション本体の動作には不要です）。
 
 ```bash
 git clone --recurse-submodules https://github.com/hum2music/hum2music.git
+bun install
+bun apps/cli/src/index.ts transcribe <input.wav> -o <output.mid>
 ```
 
 ## コントリビュート
 
-実装はまだ開始していません。Issueやディスカッションでのフィードバックを歓迎します。開発が進んだ段階で、コントリビューションガイドを別途整備する予定です。
+Issueやディスカッションでのフィードバックを歓迎します。
 
 ## License
 

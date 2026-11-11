@@ -4,12 +4,14 @@ Rules for any coding agent (Claude Code, Codex, Cursor, etc.) working in this re
 
 ## Project status
 
-Treat `PRD.md` as the authoritative product spec, and `./docs` as the implementation-level detail, final-form specification (`docs/SPECIFICATION.md`), and roadmap (`docs/ROADMAP.md`). Implement in the phase order defined there (Phase 0: audio→MIDI, Phase 1: harmony, Phase 2: arrangement = MVP, Phase 3: humanization, Phase 4: localhost UI, Phase 5: advanced arrangement). For exactly what is implemented right now (as opposed to planned), see `./tasks/STATUS.md` (private) — it is updated whenever implementation state changes and should be trusted over `./docs` for "does X exist yet".
+Treat `PRD.md` as the authoritative product spec, and `./docs` as the implementation-level architecture/engineering detail. The development plan (staged build order, acceptance criteria, final-form target spec) lives in `./tasks` (private) as `ROADMAP.md` and `SPECIFICATION.md` — read those before starting new work. For exactly what is implemented right now (as opposed to planned), see `./tasks/STATUS.md` (private) — it is updated whenever implementation state changes and should be trusted over `./docs` for "does X exist yet".
+
+**Do not introduce staged/phase language (e.g. "Phase N", progress-percentage, "MVP milestone X") into anything in the public main repo or `./docs`** — that belongs exclusively in `./tasks`. This repo stays public before the project is publicly announced, so it must not reveal how far along development is; `./docs` describes architecture and how things work, not build order or current completeness.
 
 This is a Bun workspace monorepo (`apps/*`, `packages/*`). Common commands:
 
 - `bun install` — install/link workspace packages
-- `bun test` — run the test suite (`tests/<phase>/*.test.ts`, using `bun:test`)
+- `bun test` — run the test suite (`tests/<area>/*.test.ts`, using `bun:test`)
 - `bun run typecheck` — `tsc -b` across all workspace projects
 - `bun apps/cli/src/index.ts <command> ...` — run the CLI directly from source
 
@@ -17,8 +19,8 @@ This is a Bun workspace monorepo (`apps/*`, `packages/*`). Common commands:
 
 This repo (`hum2music/hum2music`, org: `hum2music`) is **public** and holds product code plus `PRD.md`. Two other repos are mounted here as **git submodules**:
 
-- `./docs` → [hum2music/docs](https://github.com/hum2music/docs) (public) — detailed engineering specs, final-form specification, and roadmap, expanding on `PRD.md`.
-- `./tasks` → [hum2music/tasks](https://github.com/hum2music/tasks) (**private**) — all task/progress management (GitHub Issues = Next when open, Done when closed; milestones = phases).
+- `./docs` → [hum2music/docs](https://github.com/hum2music/docs) (public) — detailed engineering specs (architecture, data model, each engine), expanding on `PRD.md`. No staging/progress/phase info.
+- `./tasks` → [hum2music/tasks](https://github.com/hum2music/tasks) (**private**) — all task/progress management (GitHub Issues = Next when open, Done when closed; milestones = phases) plus `ROADMAP.md` and `SPECIFICATION.md` (the staged build plan and final-form target spec).
 
 Both are real git submodules (`.gitmodules` at repo root), not plain nested clones — when editing their content, commit and push from inside `./docs` or `./tasks` respectively, then stage the updated gitlink in the superproject.
 
