@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@hum2music/audio-analysis": "workspace:*",
-    "@hum2music/midi": "workspace:*"
+    "@hum2music/midi": "workspace:*",
+    "@hum2music/harmony": "workspace:*"
   }
 }

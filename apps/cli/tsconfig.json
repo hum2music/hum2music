@@ -5,5 +5,9 @@
     "rootDir": "./src"
   },
   "include": ["src"],
-  "references": [{ "path": "../../packages/audio-analysis" }, { "path": "../../packages/midi" }]
+  "references": [
+    { "path": "../../packages/audio-analysis" },
+    { "path": "../../packages/midi" },
+    { "path": "../../packages/harmony" }
+  ]
 }
