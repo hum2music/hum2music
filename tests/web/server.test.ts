@@ -75,16 +75,21 @@ describe("POST /api/analyze", () => {
   });
 });
 
-describe("POST /api/export/midi", () => {
-  async function analyzeNotes() {
-    const formData = new FormData();
-    formData.append("audio", scaleWavBlob(), "input.wav");
-    const response = await fetch(`${baseUrl}/api/analyze`, { method: "POST", body: formData });
-    return (await response.json()).notes;
-  }
+async function analyze() {
+  const formData = new FormData();
+  formData.append("audio", scaleWavBlob(), "input.wav");
+  const response = await fetch(`${baseUrl}/api/analyze`, { method: "POST", body: formData });
+  return response.json();
+}
 
-  test("returns a valid SMF for plain (non-humanized) notes", async () => {
-    const notes = await analyzeNotes();
+function readMidiHeader(bytes: Uint8Array) {
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+  return { magic: String.fromCharCode(...bytes.subarray(0, 4)), numTracks: view.getUint16(10, false) };
+}
+
+describe("POST /api/export/midi", () => {
+  test("returns a valid single-track SMF for plain (non-humanized, chord-less) notes", async () => {
+    const { notes } = await analyze();
     const response = await fetch(`${baseUrl}/api/export/midi`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -94,11 +99,13 @@ describe("POST /api/export/midi", () => {
     expect(response.status).toBe(200);
     expect(response.headers.get("content-type")).toBe("audio/midi");
     const bytes = new Uint8Array(await response.arrayBuffer());
-    expect(String.fromCharCode(...bytes.subarray(0, 4))).toBe("MThd");
+    const header = readMidiHeader(bytes);
+    expect(header.magic).toBe("MThd");
+    expect(header.numTracks).toBe(2); // tempo + melody only
   });
 
   test("is deterministic for the same humanize/seed", async () => {
-    const notes = await analyzeNotes();
+    const { notes } = await analyze();
     const requestBody = JSON.stringify({ notes, humanize: 0.7, seed: 7, bpm: 120 });
 
     const responseA = await fetch(`${baseUrl}/api/export/midi`, {
@@ -115,8 +122,88 @@ describe("POST /api/export/midi", () => {
     expect(new Uint8Array(await responseA.arrayBuffer())).toEqual(new Uint8Array(await responseB.arrayBuffer()));
   });
 
+  test("arranges piano/bass/drums when chords are provided", async () => {
+    const { notes, chords, selectedBpm } = await analyze();
+    const response = await fetch(`${baseUrl}/api/export/midi`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ notes, chords, bpm: selectedBpm }),
+    });
+
+    expect(response.status).toBe(200);
+    const bytes = new Uint8Array(await response.arrayBuffer());
+    expect(readMidiHeader(bytes).numTracks).toBe(5); // tempo + melody + piano + bass + drums
+  });
+
+  test("honors an explicit instrument subset", async () => {
+    const { notes, chords, selectedBpm } = await analyze();
+    const response = await fetch(`${baseUrl}/api/export/midi`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ notes, chords, bpm: selectedBpm, instruments: ["drums"] }),
+    });
+
+    expect(readMidiHeader(new Uint8Array(await response.arrayBuffer())).numTracks).toBe(3); // tempo + melody + drums
+  });
+
+  test("honors a user-edited chord progression", async () => {
+    const { notes, chords, selectedBpm } = await analyze();
+    const editedChords = chords.map((chord: { startBeat: number; durationBeats: number; confidence: number }) => ({
+      ...chord,
+      symbol: "Am7",
+    }));
+
+    const response = await fetch(`${baseUrl}/api/export/midi`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ notes, chords: editedChords, bpm: selectedBpm, instruments: ["bass"] }),
+    });
+
+    expect(response.status).toBe(200);
+    expect(readMidiHeader(new Uint8Array(await response.arrayBuffer())).numTracks).toBe(3);
+  });
+
   test("400s when 'notes' is missing or empty", async () => {
     const response = await fetch(`${baseUrl}/api/export/midi`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ notes: [] }),
+    });
+    expect(response.status).toBe(400);
+  });
+});
+
+describe("POST /api/export/wav", () => {
+  test("returns a valid WAV for melody-only export", async () => {
+    const { notes } = await analyze();
+    const response = await fetch(`${baseUrl}/api/export/wav`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ notes }),
+    });
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toBe("audio/wav");
+    const bytes = new Uint8Array(await response.arrayBuffer());
+    expect(String.fromCharCode(...bytes.subarray(0, 4))).toBe("RIFF");
+    expect(String.fromCharCode(...bytes.subarray(8, 12))).toBe("WAVE");
+  });
+
+  test("returns a valid WAV for a full arrangement", async () => {
+    const { notes, chords, selectedBpm } = await analyze();
+    const response = await fetch(`${baseUrl}/api/export/wav`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ notes, chords, bpm: selectedBpm, humanize: 0.5, seed: 3 }),
+    });
+
+    expect(response.status).toBe(200);
+    const bytes = new Uint8Array(await response.arrayBuffer());
+    expect(String.fromCharCode(...bytes.subarray(0, 4))).toBe("RIFF");
+  });
+
+  test("400s when 'notes' is missing or empty", async () => {
+    const response = await fetch(`${baseUrl}/api/export/wav`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ notes: [] }),

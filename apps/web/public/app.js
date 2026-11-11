@@ -65,17 +65,19 @@ function initUI() {
   const pitchCanvas = document.getElementById("pitch-canvas");
   const tempoCandidatesEl = document.getElementById("tempo-candidates");
   const keyCandidatesEl = document.getElementById("key-candidates");
-  const chordProgressionEl = document.getElementById("chord-progression");
   const notesSummaryEl = document.getElementById("notes-summary");
+  const chordEditorEl = document.getElementById("chord-editor");
+  const instrumentToggles = Array.from(document.querySelectorAll(".instrument-toggle"));
   const humanizeSlider = document.getElementById("humanize-slider");
   const humanizeValueEl = document.getElementById("humanize-value");
   const seedInput = document.getElementById("seed-input");
   const regenerateButton = document.getElementById("regenerate-button");
   const downloadMidiButton = document.getElementById("download-midi-button");
+  const downloadWavButton = document.getElementById("download-wav-button");
   const downloadJsonButton = document.getElementById("download-json-button");
 
   let lastAnalysis = null;
-  let lastMidiBlob = null;
+  let currentChords = [];
   let mediaRecorder = null;
   let recordedChunks = [];
 
@@ -114,13 +116,26 @@ function initUI() {
     humanizeValueEl.textContent = humanizeSlider.value;
   });
 
-  regenerateButton.addEventListener("click", () => {
-    if (lastAnalysis) regenerateMidi();
+  regenerateButton.addEventListener("click", async () => {
+    if (!lastAnalysis) return;
+    regenerateButton.disabled = true;
+    regenerateButton.textContent = "生成中...";
+    try {
+      await regenerateMidi();
+    } finally {
+      regenerateButton.disabled = false;
+      regenerateButton.textContent = "再生成";
+    }
   });
 
   downloadMidiButton.addEventListener("click", async () => {
-    if (!lastMidiBlob) await regenerateMidi();
-    if (lastMidiBlob) downloadBlob(lastMidiBlob, "melody.mid");
+    const blob = await fetchExport("/api/export/midi");
+    if (blob) downloadBlob(blob, "song.mid");
+  });
+
+  downloadWavButton.addEventListener("click", async () => {
+    const blob = await fetchExport("/api/export/wav");
+    if (blob) downloadBlob(blob, "song.wav");
   });
 
   downloadJsonButton.addEventListener("click", () => {
@@ -139,7 +154,6 @@ function initUI() {
   }
 
   async function analyze(wavBlob) {
-    lastMidiBlob = null;
     const formData = new FormData();
     formData.append("audio", wavBlob, "input.wav");
 
@@ -151,7 +165,9 @@ function initUI() {
     }
 
     lastAnalysis = await response.json();
+    currentChords = lastAnalysis.chords.map((chord) => ({ ...chord }));
     renderAnalysis(lastAnalysis);
+    renderChordEditor(currentChords);
     analysisSection.hidden = false;
     arrangementSection.hidden = false;
     exportSection.hidden = false;
@@ -166,10 +182,24 @@ function initUI() {
       .slice(0, 3)
       .map((c) => `${c.tonic} ${c.mode} (${Math.round(c.confidence * 100)}%)`)
       .join(", ");
-    chordProgressionEl.textContent = analysis.chords
-      .map((c) => `${c.symbol} (${Math.round(c.confidence * 100)}%)`)
-      .join(" - ");
     notesSummaryEl.textContent = `検出ノート数: ${analysis.notes.length} / 推定BPM: ${analysis.selectedBpm}`;
+  }
+
+  function renderChordEditor(chords) {
+    chordEditorEl.replaceChildren();
+    chords.forEach((chord, index) => {
+      const label = document.createElement("label");
+      label.textContent = `bar ${index + 1}: `;
+      const input = document.createElement("input");
+      input.type = "text";
+      input.value = chord.symbol;
+      input.size = 6;
+      input.addEventListener("input", () => {
+        currentChords[index] = { ...currentChords[index], symbol: input.value };
+      });
+      label.appendChild(input);
+      chordEditorEl.appendChild(label);
+    });
   }
 
   function drawPitchCurve(pitchCurve, notes) {
@@ -212,23 +242,42 @@ function initUI() {
     }
   }
 
+  function selectedInstruments() {
+    return instrumentToggles.filter((toggle) => toggle.checked).map((toggle) => toggle.value);
+  }
+
+  function buildExportRequestBody() {
+    return {
+      notes: lastAnalysis.notes,
+      chords: currentChords,
+      instruments: selectedInstruments(),
+      humanize: Number(humanizeSlider.value),
+      seed: Number(seedInput.value),
+      bpm: lastAnalysis.selectedBpm,
+    };
+  }
+
   async function regenerateMidi() {
     const response = await fetch("/api/export/midi", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        notes: lastAnalysis.notes,
-        humanize: Number(humanizeSlider.value),
-        seed: Number(seedInput.value),
-        bpm: lastAnalysis.selectedBpm,
-      }),
+      body: JSON.stringify(buildExportRequestBody()),
     });
+    if (!response.ok) alert("MIDI生成に失敗しました");
+  }
 
+  async function fetchExport(path) {
+    if (!lastAnalysis) return null;
+    const response = await fetch(path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(buildExportRequestBody()),
+    });
     if (!response.ok) {
-      alert("MIDI生成に失敗しました");
-      return;
+      alert("書き出しに失敗しました");
+      return null;
     }
-    lastMidiBlob = await response.blob();
+    return response.blob();
   }
 
   function downloadBlob(blob, filename) {

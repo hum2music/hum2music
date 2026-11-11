@@ -9,6 +9,8 @@
     { "path": "../../packages/audio-analysis" },
     { "path": "../../packages/harmony" },
     { "path": "../../packages/expression" },
-    { "path": "../../packages/midi" }
+    { "path": "../../packages/midi" },
+    { "path": "../../packages/arrangement" },
+    { "path": "../../packages/rendering" }
   ]
 }
