@@ -20,7 +20,7 @@ function readAscii(view: DataView, offset: number, length: number): string {
 }
 
 describe("hum2music generate (CLI)", () => {
-  test("writes a 5-track SMF (tempo + melody/piano/bass/drums) by default", async () => {
+  test("writes a 6-track SMF (tempo + melody/piano/bass/drums/guitar) by default", async () => {
     const dir = await mkdtemp(join(tmpdir(), "hum2music-cli-generate-"));
     try {
       const inputPath = await writeScaleFixture(dir);
@@ -35,7 +35,7 @@ describe("hum2music generate (CLI)", () => {
       const bytes = new Uint8Array(await Bun.file(outputPath).arrayBuffer());
       const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
       expect(readAscii(view, 0, 4)).toBe("MThd");
-      expect(view.getUint16(10, false)).toBe(5);
+      expect(view.getUint16(10, false)).toBe(6);
     } finally {
       await rm(dir, { recursive: true, force: true });
     }
@@ -78,6 +78,60 @@ describe("hum2music generate (CLI)", () => {
       const view = new DataView(wavBytes.buffer, wavBytes.byteOffset, wavBytes.byteLength);
       expect(readAscii(view, 0, 4)).toBe("RIFF");
       expect(readAscii(view, 8, 4)).toBe("WAVE");
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  }, 20000);
+
+  test("--style ballad --song-structure runs without error and produces a valid SMF", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "hum2music-cli-generate-"));
+    try {
+      const inputPath = await writeScaleFixture(dir);
+      const outputPath = join(dir, "song.mid");
+
+      const proc = Bun.spawn(
+        [
+          "bun",
+          CLI_ENTRY,
+          "generate",
+          inputPath,
+          "-o",
+          outputPath,
+          "--style",
+          "ballad",
+          "--song-structure",
+          "--humanize",
+          "0.5",
+          "--seed",
+          "2",
+        ],
+        { stdout: "pipe", stderr: "pipe" },
+      );
+      expect(await proc.exited).toBe(0);
+
+      const bytes = new Uint8Array(await Bun.file(outputPath).arrayBuffer());
+      const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+      expect(readAscii(view, 0, 4)).toBe("MThd");
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  }, 20000);
+
+  test("--instruments guitar arranges only the guitar track", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "hum2music-cli-generate-"));
+    try {
+      const inputPath = await writeScaleFixture(dir);
+      const outputPath = join(dir, "song.mid");
+
+      const proc = Bun.spawn(["bun", CLI_ENTRY, "generate", inputPath, "-o", outputPath, "--instruments", "guitar"], {
+        stdout: "pipe",
+        stderr: "pipe",
+      });
+      expect(await proc.exited).toBe(0);
+
+      const bytes = new Uint8Array(await Bun.file(outputPath).arrayBuffer());
+      const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+      expect(view.getUint16(10, false)).toBe(3); // tempo + melody + guitar
     } finally {
       await rm(dir, { recursive: true, force: true });
     }

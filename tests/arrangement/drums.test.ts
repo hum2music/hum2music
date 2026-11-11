@@ -25,4 +25,12 @@ describe("generateDrumArrangement", () => {
     expect(notes.filter((n) => n.pitch === KICK_PITCH)).toHaveLength(4);
     expect(notes.filter((n) => n.startBeat >= 4)).toHaveLength(12);
   });
+
+  test("sparse density plays a half-time feel: kick on 1 only, snare on 3 only, quarter-note hi-hat", () => {
+    const notes = generateDrumArrangement([chord("C", 0)], { density: "sparse" });
+
+    expect(notes.filter((n) => n.pitch === KICK_PITCH).map((n) => n.startBeat)).toEqual([0]);
+    expect(notes.filter((n) => n.pitch === SNARE_PITCH).map((n) => n.startBeat)).toEqual([2]);
+    expect(notes.filter((n) => n.pitch === CLOSED_HIHAT_PITCH)).toHaveLength(4);
+  });
 });

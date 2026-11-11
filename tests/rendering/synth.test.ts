@@ -46,4 +46,24 @@ describe("renderToSamples", () => {
     expect(samples.length).toBeGreaterThan(0);
     expect(Math.max(...Array.from(samples).map(Math.abs))).toBe(0);
   });
+
+  test("different timbres produce audibly different waveforms for the same note", () => {
+    const note = { startMs: 0, durationMs: 300, velocity: 100, frequencyHz: 220 };
+    const melody = renderToSamples([{ ...note, timbre: "melody" }], [], {});
+    const piano = renderToSamples([{ ...note, timbre: "piano" }], [], {});
+    const bass = renderToSamples([{ ...note, timbre: "bass" }], [], {});
+    const guitar = renderToSamples([{ ...note, timbre: "guitar" }], [], {});
+
+    expect(Array.from(piano)).not.toEqual(Array.from(melody));
+    expect(Array.from(bass)).not.toEqual(Array.from(melody));
+    expect(Array.from(guitar)).not.toEqual(Array.from(melody));
+    expect(Array.from(piano)).not.toEqual(Array.from(guitar));
+  });
+
+  test("defaults to the melody timbre when none is given", () => {
+    const note = { startMs: 0, durationMs: 300, velocity: 100, frequencyHz: 220 };
+    const withDefault = renderToSamples([note], [], {});
+    const withExplicitMelody = renderToSamples([{ ...note, timbre: "melody" as const }], [], {});
+    expect(Array.from(withDefault)).toEqual(Array.from(withExplicitMelody));
+  });
 });

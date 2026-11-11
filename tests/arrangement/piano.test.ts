@@ -39,4 +39,21 @@ describe("generatePianoArrangement", () => {
     const chords = [chord("C", 0), chord("F", 4), chord("G", 8), chord("C", 12)];
     expect(generatePianoArrangement(chords)).toEqual(generatePianoArrangement(chords));
   });
+
+  test("arpeggio pattern spreads the voicing across the bar instead of sustaining it", () => {
+    const notes = generatePianoArrangement([chord("C", 0)], { pattern: "arpeggio" });
+    const startBeats = new Set(notes.map((n) => n.startBeat));
+    expect(startBeats.size).toBeGreaterThan(1);
+    for (const beat of startBeats) {
+      expect(notes.filter((n) => n.startBeat === beat)).toHaveLength(1);
+    }
+  });
+
+  test("allowExtensions adds the 9th as an extra voiced tone", () => {
+    const plain = generatePianoArrangement([chord("C", 0)]);
+    const extended = generatePianoArrangement([chord("C", 0)], { allowExtensions: true });
+
+    expect(extended.length).toBe(plain.length + 1);
+    expect(extended.map((n) => pitchClassOf(n.pitch)).sort((a, b) => a - b)).toEqual([0, 2, 4, 7]); // C E G D(9th)
+  });
 });

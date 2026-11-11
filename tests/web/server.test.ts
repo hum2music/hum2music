@@ -122,7 +122,7 @@ describe("POST /api/export/midi", () => {
     expect(new Uint8Array(await responseA.arrayBuffer())).toEqual(new Uint8Array(await responseB.arrayBuffer()));
   });
 
-  test("arranges piano/bass/drums when chords are provided", async () => {
+  test("arranges piano/bass/drums/guitar when chords are provided", async () => {
     const { notes, chords, selectedBpm } = await analyze();
     const response = await fetch(`${baseUrl}/api/export/midi`, {
       method: "POST",
@@ -132,7 +132,19 @@ describe("POST /api/export/midi", () => {
 
     expect(response.status).toBe(200);
     const bytes = new Uint8Array(await response.arrayBuffer());
-    expect(readMidiHeader(bytes).numTracks).toBe(5); // tempo + melody + piano + bass + drums
+    expect(readMidiHeader(bytes).numTracks).toBe(6); // tempo + melody + piano + bass + drums + guitar
+  });
+
+  test("honors style and songStructure, still producing a valid SMF", async () => {
+    const { notes, chords, selectedBpm } = await analyze();
+    const response = await fetch(`${baseUrl}/api/export/midi`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ notes, chords, bpm: selectedBpm, style: "ballad", songStructure: true, humanize: 0.5, seed: 2 }),
+    });
+
+    expect(response.status).toBe(200);
+    expect(readMidiHeader(new Uint8Array(await response.arrayBuffer())).magic).toBe("MThd");
   });
 
   test("honors an explicit instrument subset", async () => {

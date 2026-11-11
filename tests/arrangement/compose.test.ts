@@ -24,7 +24,7 @@ describe("composeTracks", () => {
 
   test("includes melody plus every requested instrument, in order", () => {
     const tracks = composeTracks({ melody: melody(), chords: chords(), bpm: 120 });
-    expect(tracks.map((t) => t.instrument)).toEqual(["melody", "piano", "bass", "drums"]);
+    expect(tracks.map((t) => t.instrument)).toEqual(["melody", "piano", "bass", "drums", "guitar"]);
   });
 
   test("assigns drums to channel 9 and no program change, melody to channel 0", () => {
