@@ -19,3 +19,6 @@
 [submodule "packages/midi"]
 	path = packages/midi
 	url = https://github.com/hum2music/midi
+[submodule "packages/harmony"]
+	path = packages/harmony
+	url = https://github.com/hum2music/harmony
