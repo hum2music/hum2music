@@ -25,6 +25,25 @@ Both are real git submodules (`.gitmodules` at repo root), not plain nested clon
 
 Commit early and often in small, logical increments rather than batching unrelated work into one large commit. Don't wait for a whole feature/phase to be "done" before committing — commit each coherent step as you go. This applies to the main repo and to `./docs`/`./tasks` individually.
 
+## Commit message format
+
+Write all commit messages following [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/):
+
+```
+<type>[optional scope][!]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+- `type` is a lowercase noun (`feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, etc.). Use `feat` for new features and `fix` for bug fixes; prefer one type per commit — split into multiple commits if a change spans more than one type.
+- `scope` is optional, parenthesized, e.g. `fix(audio-analysis): ...`.
+- A required colon + space follows the type/scope, then a short imperative description on the same line.
+- Breaking changes: either append `!` right before the colon (e.g. `feat!: ...`), or add a `BREAKING CHANGE: <description>` footer (or both). The `BREAKING CHANGE` token itself must stay uppercase.
+- Body (optional) starts one blank line after the description; footers (optional) start one blank line after the body, each as `Token: value` or `Token #value`, tokens hyphenated (e.g. `Reviewed-by:`) except `BREAKING CHANGE`.
+- Still no AI attribution footers (see the user-level rule) — Conventional Commits' free-form footers do not override that.
+
 ## Core design principles (binding constraints from PRD.md)
 
 These constrain implementation choices once code exists — violating them contradicts the product's stated purpose:
