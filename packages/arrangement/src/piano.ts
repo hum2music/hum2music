@@ -5,14 +5,23 @@ import type { ArrangementContext, InstrumentArranger } from "./types";
 const MIN_PITCH = 48; // C3
 const MAX_PITCH = 72; // C5
 const VELOCITY = 70;
+const NINTH_INTERVAL_SEMITONES = 2;
+
+export interface PianoArrangementOptions {
+  pattern?: "block" | "arpeggio";
+  /** Lets the voicing search also place the 9th, for a richer/"more advanced" sound (docs/specs/style-profiles.md). */
+  allowExtensions?: boolean;
+}
 
 /**
- * Block-chord comping: for each bar, picks the voicing (octave placement of
- * the chord's tones within the piano's range) with the smallest total
+ * For each bar, picks the voicing (octave placement of the chord's tones,
+ * optionally plus the 9th) within the piano's range with the smallest total
  * movement from the previous bar's voicing, rather than always using the
- * same inversion (PRD §9.2).
+ * same inversion (PRD §9.2). Played either as a sustained block chord or a
+ * simple ascending arpeggio across the bar.
  */
-export function generatePianoArrangement(chords: ChordEvent[]): NoteEvent[] {
+export function generatePianoArrangement(chords: ChordEvent[], options: PianoArrangementOptions = {}): NoteEvent[] {
+  const pattern = options.pattern ?? "block";
   const notes: NoteEvent[] = [];
   let previousVoicing: number[] | null = null;
 
@@ -20,8 +29,26 @@ export function generatePianoArrangement(chords: ChordEvent[]): NoteEvent[] {
     const parsed = parseChordSymbol(chord.symbol);
     if (!parsed) continue;
 
-    const voicing = chooseVoicing(chordPitchClasses(parsed.root, parsed.quality), previousVoicing);
+    const toneClasses = chordPitchClasses(parsed.root, parsed.quality);
+    const availableTones = options.allowExtensions
+      ? [...toneClasses, pitchClassOf(parsed.root + NINTH_INTERVAL_SEMITONES)]
+      : toneClasses;
+
+    const voicing = chooseVoicing(availableTones, previousVoicing);
     previousVoicing = voicing;
+
+    if (pattern === "arpeggio") {
+      const quarter = chord.durationBeats / 4;
+      voicing.forEach((pitch, index) => {
+        notes.push({
+          pitch,
+          startBeat: chord.startBeat + (index % 4) * quarter,
+          durationBeats: quarter * 0.9,
+          velocity: VELOCITY,
+        });
+      });
+      continue;
+    }
 
     for (const pitch of voicing) {
       notes.push({ pitch, startBeat: chord.startBeat, durationBeats: chord.durationBeats, velocity: VELOCITY });
