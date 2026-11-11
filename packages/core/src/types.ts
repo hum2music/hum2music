@@ -49,6 +49,13 @@ export interface ChordEvent {
   confidence: number;
 }
 
+/** One labeled span of bars in a bar-level repetition analysis (e.g. A/A/B for a repeated 4-bar cycle). */
+export interface SongSection {
+  label: string;
+  startBarIndex: number;
+  barCount: number;
+}
+
 export interface InstrumentTrack {
   instrument: string;
   notes: NoteEvent[];

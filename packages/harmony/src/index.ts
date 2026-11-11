@@ -7,4 +7,5 @@ export * from "./bars";
 export * from "./harmonic-naturalness";
 export * from "./voice-leading";
 export * from "./progression-search";
+export * from "./song-structure";
 export * from "./analyze";
