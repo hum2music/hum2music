@@ -13,3 +13,6 @@
 [submodule "packages/audio-analysis"]
 	path = packages/audio-analysis
 	url = https://github.com/hum2music/audio-analysis
+[submodule "packages/expression"]
+	path = packages/expression
+	url = https://github.com/hum2music/expression
