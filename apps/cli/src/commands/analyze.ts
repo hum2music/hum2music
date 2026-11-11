@@ -48,6 +48,7 @@ export async function runAnalyze(args: string[]): Promise<void> {
           keyCandidates: analysis.keyCandidates,
           melody: analysis.melody,
           chords: values.chords ? analysis.chords : undefined,
+          songSections: values.chords ? analysis.songSections : undefined,
         },
         null,
         2,
@@ -67,7 +68,12 @@ export async function runAnalyze(args: string[]): Promise<void> {
         `  bar @ beat ${chord.startBeat}: ${chord.symbol} (confidence ${chord.confidence.toFixed(2)})`,
       );
     }
+    console.log(`Song structure: ${formatSongSections(analysis.songSections)}`);
   }
+}
+
+function formatSongSections(sections: ReturnType<typeof analyzeHarmony>["songSections"]): string {
+  return sections.map((s) => s.label).join("") || "(none)";
 }
 
 function formatTempoCandidates(candidates: ReturnType<typeof analyzeHarmony>["tempoCandidates"]): string {

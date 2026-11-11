@@ -8,7 +8,13 @@ import {
 import { decodeWav, encodeWavPcm16, midiNoteToFrequency, transcribeMelody } from "@hum2music/audio-analysis";
 import { analyzeHarmony, type TimedNote } from "@hum2music/harmony";
 import { noteEventsToMidiNotes, writeMultiTrackMidiFile, type MidiNoteEvent, type MidiTrack } from "@hum2music/midi";
-import { classifyDrumNote, renderToSamples, type DrumRenderNote, type PitchedRenderNote } from "@hum2music/rendering";
+import {
+  classifyDrumNote,
+  renderToSamples,
+  type DrumRenderNote,
+  type PitchedRenderNote,
+  type Timbre,
+} from "@hum2music/rendering";
 
 const DEFAULT_SEED = 42;
 
@@ -22,6 +28,8 @@ export async function runGenerate(args: string[]): Promise<void> {
       humanize: { type: "string" },
       seed: { type: "string" },
       bpm: { type: "string" },
+      style: { type: "string" },
+      "song-structure": { type: "boolean", default: false },
     },
     allowPositionals: true,
   });
@@ -30,7 +38,7 @@ export async function runGenerate(args: string[]): Promise<void> {
   const outputPath = values.output;
   if (!inputPath || !outputPath) {
     console.error(
-      "Usage: hum2music generate <input.wav> -o <song.mid> [--wav <song.wav>] [--instruments piano,bass,drums] [--humanize <0-1>] [--seed <number>] [--bpm <number>]",
+      "Usage: hum2music generate <input.wav> -o <song.mid> [--wav <song.wav>] [--instruments piano,bass,drums,guitar] [--style pop|ballad] [--song-structure] [--humanize <0-1>] [--seed <number>] [--bpm <number>]",
     );
     process.exit(1);
   }
@@ -52,7 +60,7 @@ export async function runGenerate(args: string[]): Promise<void> {
   }));
 
   const overrideBpm = values.bpm !== undefined ? Number(values.bpm) : undefined;
-  const { melody, chords, selectedBpm } = analyzeHarmony(timedNotes, overrideBpm);
+  const { melody, chords, songSections, selectedBpm } = analyzeHarmony(timedNotes, { overrideBpm });
 
   const seed = values.seed !== undefined ? Number(values.seed) : DEFAULT_SEED;
   const tracks = composeTracks({
@@ -62,6 +70,8 @@ export async function runGenerate(args: string[]): Promise<void> {
     humanizeAmount: values.humanize !== undefined ? Number(values.humanize) : 0,
     seed,
     bpm: selectedBpm,
+    style: values.style,
+    songSections: values["song-structure"] ? songSections : undefined,
   });
 
   const midiTracks: MidiTrack[] = tracks.map((track) => ({
@@ -104,12 +114,14 @@ function renderTracksToWav(tracks: ComposedTrack[], bpm: number, seed: number): 
         });
       }
     } else {
+      const timbre = track.instrument as Timbre;
       for (const note of midiNotes) {
         pitchedNotes.push({
           startMs: note.startMs,
           durationMs: note.durationMs,
           velocity: note.velocity,
           frequencyHz: midiNoteToFrequency(note.pitch),
+          timbre,
         });
       }
     }
