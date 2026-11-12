@@ -45,6 +45,7 @@
     "@hum2music/style-piano-solo": "workspace:*",
     "@hum2music/orchestration": "workspace:*",
     "@hum2music/composer-motif-development": "workspace:*",
+    "@hum2music/composer-chorale": "workspace:*",
     "@hum2music/renderer-builtin-synth": "workspace:*",
     "@hum2music/testing": "workspace:*"
   }

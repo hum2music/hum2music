@@ -14,6 +14,7 @@
     { "path": "./packages/form" },
     { "path": "./packages/orchestration" },
     { "path": "./plugins/composers/motif-development" },
+    { "path": "./plugins/composers/chorale" },
     { "path": "./packages/plugin-api" },
     { "path": "./packages/plugin-host" },
     { "path": "./packages/sdk" },

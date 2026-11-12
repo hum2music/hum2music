@@ -7,6 +7,7 @@
       "devDependencies": {
         "@hum2music/arrangement": "workspace:*",
         "@hum2music/audio-analysis": "workspace:*",
+        "@hum2music/composer-chorale": "workspace:*",
         "@hum2music/composer-motif-development": "workspace:*",
         "@hum2music/core": "workspace:*",
         "@hum2music/counterpoint": "workspace:*",
@@ -48,6 +49,7 @@
       "dependencies": {
         "@hum2music/arrangement": "workspace:*",
         "@hum2music/audio-analysis": "workspace:*",
+        "@hum2music/composer-chorale": "workspace:*",
         "@hum2music/composer-motif-development": "workspace:*",
         "@hum2music/expression": "workspace:*",
         "@hum2music/harmony": "workspace:*",
@@ -198,6 +200,7 @@
       "name": "@hum2music/sdk",
       "version": "0.1.0",
       "dependencies": {
+        "@hum2music/arrangement": "workspace:*",
         "@hum2music/core": "workspace:*",
         "@hum2music/plugin-api": "workspace:*",
         "@hum2music/plugin-host": "workspace:*",
@@ -209,6 +212,17 @@
       "dependencies": {
         "@hum2music/plugin-api": "workspace:*",
         "@hum2music/plugin-host": "workspace:*",
+      },
+    },
+    "plugins/composers/chorale": {
+      "name": "@hum2music/composer-chorale",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hum2music/core": "workspace:*",
+        "@hum2music/counterpoint": "workspace:*",
+        "@hum2music/form": "workspace:*",
+        "@hum2music/motif": "workspace:*",
+        "@hum2music/plugin-api": "workspace:*",
       },
     },
     "plugins/composers/motif-development": {
@@ -321,6 +335,8 @@
     "@hum2music/arrangement": ["@hum2music/arrangement@workspace:packages/arrangement"],
 
     "@hum2music/audio-analysis": ["@hum2music/audio-analysis@workspace:packages/audio-analysis"],
+
+    "@hum2music/composer-chorale": ["@hum2music/composer-chorale@workspace:plugins/composers/chorale"],
 
     "@hum2music/composer-motif-development": ["@hum2music/composer-motif-development@workspace:plugins/composers/motif-development"],
 

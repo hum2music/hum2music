@@ -42,6 +42,7 @@
     "@hum2music/counterpoint": "workspace:*",
     "@hum2music/form": "workspace:*",
     "@hum2music/orchestration": "workspace:*",
-    "@hum2music/composer-motif-development": "workspace:*"
+    "@hum2music/composer-motif-development": "workspace:*",
+    "@hum2music/composer-chorale": "workspace:*"
   }
 }
