@@ -28,6 +28,15 @@ function findProgramChangeValue(buffer: ArrayBuffer, statusByte = 0xc2): number 
   return undefined;
 }
 
+/** Counts Set Tempo meta events (FF 51 03) anywhere in the file - only ever appear in the tempo track. */
+function countSetTempoEvents(bytes: Uint8Array): number {
+  let count = 0;
+  for (let i = 0; i < bytes.length - 2; i++) {
+    if (bytes[i] === 0xff && bytes[i + 1] === 0x51 && bytes[i + 2] === 0x03) count++;
+  }
+  return count;
+}
+
 describe("hum2music compose (CLI, routed through the Plugin API)", () => {
   test("writes a 6-track SMF (tempo + melody/piano/bass/drums/guitar) by default", async () => {
     const dir = await mkdtemp(join(tmpdir(), "hum2music-cli-compose-"));
@@ -197,6 +206,98 @@ describe("hum2music compose (CLI, routed through the Plugin API)", () => {
       const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
       expect(readAscii(view, 0, 4)).toBe("MThd");
       expect(view.getUint16(10, false)).toBe(2); // tempo + the composer's single output track
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  }, 20000);
+
+  test("--composer chorale produces a Theme+Variations SMF with a real second voice", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "hum2music-cli-compose-"));
+    try {
+      const inputPath = await writeScaleFixture(dir);
+      const choralePath = join(dir, "chorale.mid");
+      const motifPath = join(dir, "motif.mid");
+
+      for (const [composer, outputPath] of [
+        ["chorale", choralePath],
+        ["motif-development", motifPath],
+      ] as const) {
+        const proc = Bun.spawn(["bun", CLI_ENTRY, "compose", inputPath, "-o", outputPath, "--composer", composer], {
+          stdout: "pipe",
+          stderr: "pipe",
+        });
+        expect(await proc.exited).toBe(0);
+      }
+
+      // Chorale adds a real counterpoint voice alongside the same theme
+      // material motif-development alone produces, so its output should be
+      // the larger of the two.
+      const choraleBytes = await Bun.file(choralePath).arrayBuffer();
+      const motifBytes = await Bun.file(motifPath).arrayBuffer();
+      expect(choraleBytes.byteLength).toBeGreaterThan(motifBytes.byteLength);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  }, 20000);
+
+  test("--humanize applies seeded timing/velocity variation on top of the default arrangement", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "hum2music-cli-compose-"));
+    try {
+      const inputPath = await writeScaleFixture(dir);
+      const plainPath = join(dir, "plain.mid");
+      const humanizedPath = join(dir, "humanized.mid");
+
+      for (const [humanize, outputPath] of [
+        [undefined, plainPath],
+        ["1", humanizedPath],
+      ] as const) {
+        const args = ["bun", CLI_ENTRY, "compose", inputPath, "-o", outputPath, "--instruments", "violin"];
+        if (humanize !== undefined) args.push("--humanize", humanize);
+        const proc = Bun.spawn(args, { stdout: "pipe", stderr: "pipe" });
+        expect(await proc.exited).toBe(0);
+      }
+
+      const plainBytes = await Bun.file(plainPath).arrayBuffer();
+      const humanizedBytes = await Bun.file(humanizedPath).arrayBuffer();
+      expect(Buffer.from(humanizedBytes).equals(Buffer.from(plainBytes))).toBe(false);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  }, 20000);
+
+  test("--humanize also produces a tempo track with a terminal ritardando (multiple Set Tempo events)", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "hum2music-cli-compose-"));
+    try {
+      const inputPath = await writeScaleFixture(dir);
+      const outputPath = join(dir, "song.mid");
+
+      const proc = Bun.spawn(
+        ["bun", CLI_ENTRY, "compose", inputPath, "-o", outputPath, "--instruments", "violin", "--humanize", "1"],
+        { stdout: "pipe", stderr: "pipe" },
+      );
+      expect(await proc.exited).toBe(0);
+
+      const bytes = new Uint8Array(await Bun.file(outputPath).arrayBuffer());
+      expect(countSetTempoEvents(bytes)).toBeGreaterThan(1);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  }, 20000);
+
+  test("without --humanize, the tempo track has only the single constant-tempo event", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "hum2music-cli-compose-"));
+    try {
+      const inputPath = await writeScaleFixture(dir);
+      const outputPath = join(dir, "song.mid");
+
+      const proc = Bun.spawn(["bun", CLI_ENTRY, "compose", inputPath, "-o", outputPath, "--instruments", "violin"], {
+        stdout: "pipe",
+        stderr: "pipe",
+      });
+      expect(await proc.exited).toBe(0);
+
+      const bytes = new Uint8Array(await Bun.file(outputPath).arrayBuffer());
+      expect(countSetTempoEvents(bytes)).toBe(1);
     } finally {
       await rm(dir, { recursive: true, force: true });
     }

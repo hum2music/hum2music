@@ -1,4 +1,5 @@
 import type { ChordEvent, KeyCandidate, NoteEvent, SongSection } from "@hum2music/core";
+import { applySectionalHumanization } from "@hum2music/arrangement";
 import {
   COMPOSITION_SCHEMA_VERSION,
   type ArrangementContext,
@@ -18,6 +19,15 @@ export interface ComposeOptions {
   instruments: string[];
   style?: string;
   seed?: number;
+  /**
+   * 0 (default) leaves every arranger's output untouched. Above 0, each
+   * track is run through @hum2music/expression's section-aware
+   * humanization (timing/velocity jitter, swing, a dynamic arc that
+   * swells on repeated song sections) — scaled by the active style's
+   * `expression.humanizeMultiplier`, same formula as the legacy
+   * composeTracks()/`generate` pipeline (PRD §10.5, §11.3).
+   */
+  humanizeAmount?: number;
 }
 
 /**
@@ -61,7 +71,8 @@ export async function compose(context: PluginContext, options: ComposeOptions): 
       seed,
     };
 
-    const notes = await arranger.arrange(arrangementContext);
+    const arrangedNotes = await arranger.arrange(arrangementContext);
+    const notes = humanizeTrack(arrangedNotes, instrumentId, sections, options, style?.expression?.humanizeMultiplier);
     tracks.push({ instrumentId, notes });
     otherTracks.set(instrumentId, notes);
   }
@@ -77,4 +88,23 @@ export async function compose(context: PluginContext, options: ComposeOptions): 
     chords: options.chords,
     sections,
   };
+}
+
+function humanizeTrack(
+  notes: NoteEvent[],
+  instrumentId: string,
+  sections: SongSection[],
+  options: ComposeOptions,
+  styleHumanizeMultiplier: number | undefined,
+): NoteEvent[] {
+  const humanizeAmount = options.humanizeAmount ?? 0;
+  if (humanizeAmount <= 0) return notes;
+
+  const baseAmount = Math.min(1, humanizeAmount * (styleHumanizeMultiplier ?? 1));
+  return applySectionalHumanization(notes, sections, {
+    baseAmount,
+    seed: options.seed ?? DEFAULT_SEED,
+    bpm: options.bpm,
+    instrument: instrumentId,
+  });
 }

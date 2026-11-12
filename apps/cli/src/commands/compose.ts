@@ -2,7 +2,9 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { decodeWav, encodeWavPcm16, reduceNoise, transcribeMelody } from "@hum2music/audio-analysis";
+import { deriveSectionTempoCurve } from "@hum2music/expression";
 import { analyzeHarmony, type HarmonyAnalysis, type TimedNote } from "@hum2music/harmony";
+import { choraleComposerPlugin } from "@hum2music/composer-chorale";
 import { motifDevelopmentComposerPlugin } from "@hum2music/composer-motif-development";
 import { bassInstrumentPlugin } from "@hum2music/instrument-bass";
 import { celloInstrumentPlugin } from "@hum2music/instrument-cello";
@@ -50,6 +52,7 @@ export async function runCompose(args: string[]): Promise<void> {
       style: { type: "string" },
       orchestrate: { type: "boolean", default: false },
       composer: { type: "string" },
+      humanize: { type: "string" },
     },
     allowPositionals: true,
   });
@@ -58,7 +61,7 @@ export async function runCompose(args: string[]): Promise<void> {
   const outputPath = values.output;
   if (!inputPath || !outputPath) {
     console.error(
-      "Usage: hum2music compose <input.wav> -o <song.mid> [--wav <song.wav>] [--instruments piano,violin,viola,cello,bass,drums,guitar] [--style pop|ballad|classical|chiptune] [--orchestrate] [--composer motif-development] [--seed <number>] [--bpm <number>]",
+      "Usage: hum2music compose <input.wav> -o <song.mid> [--wav <song.wav>] [--instruments piano,violin,viola,cello,bass,drums,guitar] [--style pop|ballad|classical|chiptune] [--orchestrate] [--composer motif-development|chorale] [--humanize <0-1>] [--seed <number>] [--bpm <number>]",
     );
     process.exit(1);
   }
@@ -87,6 +90,7 @@ export async function runCompose(args: string[]): Promise<void> {
   await app.use(pianoSoloStylePlugin);
   await app.use(builtinSynthRendererPlugin);
   await app.use(motifDevelopmentComposerPlugin);
+  await app.use(choraleComposerPlugin);
 
   const config = await loadConfig();
   for (const specifier of config.plugins ?? []) {
@@ -120,9 +124,10 @@ export async function runCompose(args: string[]): Promise<void> {
   }
 
   const instruments = parseInstruments(values.instruments);
+  const humanizeAmount = values.humanize !== undefined ? Number(values.humanize) : 0;
 
   const composition = values.orchestrate
-    ? await composeWithOrchestration(app, instruments, harmony, styleId, seed)
+    ? await composeWithOrchestration(app, instruments, harmony, styleId, seed, humanizeAmount)
     : await app.compose({
         melody: harmony.melody,
         chords: harmony.chords,
@@ -131,6 +136,7 @@ export async function runCompose(args: string[]): Promise<void> {
         instruments,
         style: styleId,
         seed,
+        humanizeAmount,
       });
 
   // Outside --orchestrate, compose() only arranges the requested
@@ -148,7 +154,8 @@ export async function runCompose(args: string[]): Promise<void> {
     channel: CHANNELS[track.instrumentId] ?? 0,
     programNumber: resolveProgramNumber(app, track.instrumentId, style),
   }));
-  const midiBytes = writeMultiTrackMidiFile(midiTracks, { bpm: harmony.selectedBpm });
+  const tempoChanges = deriveSectionTempoCurve(harmony.songSections, harmony.selectedBpm, humanizeAmount);
+  const midiBytes = writeMultiTrackMidiFile(midiTracks, { bpm: harmony.selectedBpm, tempoChanges });
   await writeFileData(outputPath, midiBytes);
   console.log(`Wrote ${midiTracks.length} track(s) to ${outputPath}`);
 
@@ -176,6 +183,7 @@ async function composeWithOrchestration(
   harmony: HarmonyAnalysis,
   styleId: string | undefined,
   seed: number,
+  humanizeAmount: number,
 ): Promise<PluginComposition> {
   const ensembleInstruments = instrumentIds.map((id) => {
     const definition = app.listInstruments().find((candidate) => candidate.id === id);
@@ -195,6 +203,7 @@ async function composeWithOrchestration(
         instruments: [instrumentId],
         style: styleId,
         seed,
+        humanizeAmount,
       });
       return chordalComposition.tracks[0]?.notes ?? [];
     },

@@ -38,4 +38,15 @@ describe("humanizeMelody", () => {
     expect(result.map((n) => n.pitch)).toEqual(notes.map((n) => n.pitch));
     expect(result.length).toBe(notes.length);
   });
+
+  test("applies a per-instrument articulation style (bowed strings stay closer to legato than guitar)", () => {
+    const violin = humanizeMelody(melody(), { seed: 1, humanizeAmount: 1, bpm: 120, instrument: "violin" });
+    const guitar = humanizeMelody(melody(), { seed: 1, humanizeAmount: 1, bpm: 120, instrument: "guitar" });
+
+    // Every note but the last is shaped toward its gap to the next onset;
+    // violin's higher articulationGapRatio should hold notes longer.
+    for (let i = 0; i < violin.length - 1; i++) {
+      expect(violin[i].durationBeats).toBeGreaterThan(guitar[i].durationBeats);
+    }
+  });
 });

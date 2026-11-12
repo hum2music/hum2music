@@ -57,6 +57,32 @@ describe("writeStandardMidiFile", () => {
 
     expect(Array.from(trackData.subarray(0, 4))).toEqual([0x00, 0x90, 60, 90]);
   });
+
+  test("with no tempoChanges, produces byte-identical output to before tempoChanges existed", () => {
+    const notes = [{ pitch: 60, startMs: 0, durationMs: 300, velocity: 100 }];
+    const withoutOption = writeStandardMidiFile(notes, { bpm: 100 });
+    const withExplicitSingleChange = writeStandardMidiFile(notes, { bpm: 100, tempoChanges: [{ atBeat: 0, bpm: 100 }] });
+    expect(withExplicitSingleChange).toEqual(withoutOption);
+  });
+
+  test("tempoChanges emits one Set Tempo meta event per entry, in beat order, at the right ticks", () => {
+    const notes = [{ pitch: 60, startMs: 0, durationMs: 100, velocity: 90 }];
+    const bytes = writeStandardMidiFile(notes, {
+      bpm: 120,
+      tempoChanges: [
+        { atBeat: 0, bpm: 120 },
+        { atBeat: 4, bpm: 90 },
+      ],
+    });
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    const track0Length = view.getUint32(14 + 4, false);
+    const tempoTrackData = bytes.subarray(14 + 8, 14 + 8 + track0Length);
+
+    // First event: delta 0, Set Tempo meta (FF 51 03), 120 BPM = 500000us/quarter = 0x07A120
+    expect(Array.from(tempoTrackData.subarray(0, 7))).toEqual([0x00, 0xff, 0x51, 0x03, 0x07, 0xa1, 0x20]);
+    // Second event: delta 4 beats * 480 ppq = 1920 ticks (VLQ: 0x8F 0x00), 90 BPM = 666667us/quarter = 0x0A2C2B
+    expect(Array.from(tempoTrackData.subarray(7, 15))).toEqual([0x8f, 0x00, 0xff, 0x51, 0x03, 0x0a, 0x2c, 0x2b]);
+  });
 });
 
 function readAscii(view: DataView, offset: number, length: number): string {

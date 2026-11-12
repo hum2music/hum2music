@@ -5,5 +5,5 @@
     "rootDir": "./src"
   },
   "include": ["src"],
-  "references": [{ "path": "../core" }, { "path": "../plugin-api" }, { "path": "../plugin-host" }]
+  "references": [{ "path": "../arrangement" }, { "path": "../core" }, { "path": "../plugin-api" }, { "path": "../plugin-host" }]
 }

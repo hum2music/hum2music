@@ -71,6 +71,74 @@ describe("createHum2Music", () => {
     expect(block.tracks[0].notes.length).not.toBe(arpeggio.tracks[0].notes.length);
   });
 
+  test("humanizeAmount is a no-op by default (output matches the raw arranger)", async () => {
+    const app = createHum2Music();
+    await app.use(violinInstrumentPlugin);
+
+    const raw = await app.compose({ melody: [], chords: CHORDS, bpm: 120, instruments: ["violin"] });
+    const explicitZero = await app.compose({ melody: [], chords: CHORDS, bpm: 120, instruments: ["violin"], humanizeAmount: 0 });
+
+    expect(explicitZero.tracks[0].notes).toEqual(raw.tracks[0].notes);
+  });
+
+  test("humanizeAmount applies seeded timing/velocity variation on top of the arranger's output", async () => {
+    const app = createHum2Music();
+    await app.use(violinInstrumentPlugin);
+
+    const raw = await app.compose({ melody: [], chords: CHORDS, bpm: 120, instruments: ["violin"], seed: 7 });
+    const humanized = await app.compose({
+      melody: [],
+      chords: CHORDS,
+      bpm: 120,
+      instruments: ["violin"],
+      seed: 7,
+      humanizeAmount: 1,
+    });
+
+    expect(humanized.tracks[0].notes).not.toEqual(raw.tracks[0].notes);
+    expect(humanized.tracks[0].notes.length).toBe(raw.tracks[0].notes.length);
+  });
+
+  test("humanizeAmount is scaled by the active style's expression.humanizeMultiplier", async () => {
+    const app = createHum2Music();
+    await app.use(violinInstrumentPlugin);
+    await app.use(popBalladStylePlugin);
+
+    // Same seed/humanizeAmount, only the style (and therefore its
+    // humanizeMultiplier) differs - ballad's 0.7 vs pop's 1 should produce
+    // a different jitter/dynamic-arc outcome.
+    const pop = await app.compose({
+      melody: [],
+      chords: CHORDS,
+      bpm: 120,
+      instruments: ["violin"],
+      style: "pop",
+      seed: 7,
+      humanizeAmount: 1,
+    });
+    const ballad = await app.compose({
+      melody: [],
+      chords: CHORDS,
+      bpm: 120,
+      instruments: ["violin"],
+      style: "ballad",
+      seed: 7,
+      humanizeAmount: 1,
+    });
+
+    expect(ballad.tracks[0].notes).not.toEqual(pop.tracks[0].notes);
+  });
+
+  test("humanizeAmount is deterministic for the same seed", async () => {
+    const app = createHum2Music();
+    await app.use(violinInstrumentPlugin);
+
+    const a = await app.compose({ melody: [], chords: CHORDS, bpm: 120, instruments: ["violin"], seed: 3, humanizeAmount: 1 });
+    const b = await app.compose({ melody: [], chords: CHORDS, bpm: 120, instruments: ["violin"], seed: 3, humanizeAmount: 1 });
+
+    expect(b.tracks[0].notes).toEqual(a.tracks[0].notes);
+  });
+
   test("getStyle looks up a registered style's full definition", async () => {
     const app = createHum2Music();
     await app.use(popBalladStylePlugin);
