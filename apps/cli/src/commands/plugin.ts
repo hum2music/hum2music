@@ -12,10 +12,12 @@ import { violinInstrumentPlugin } from "@hum2music/instrument-violin";
 import { builtinSynthRendererPlugin } from "@hum2music/renderer-builtin-synth";
 import { createHum2Music } from "@hum2music/sdk";
 import { chiptuneStylePlugin } from "@hum2music/style-chiptune";
+import { pianoSoloStylePlugin } from "@hum2music/style-piano-solo";
 import { classicalStylePlugin } from "@hum2music/style-classical";
 import { popBalladStylePlugin } from "@hum2music/style-pop-ballad";
 import { validateInstrument } from "@hum2music/testing";
-import { loadPluginModule } from "../plugin-loader";
+import { writeFileData } from "../fs-compat.ts";
+import { loadPluginModule } from "../plugin-loader.ts";
 
 const USAGE = [
   "Usage: hum2music plugin <subcommand>",
@@ -61,6 +63,7 @@ async function registerBuiltins(): Promise<ReturnType<typeof createHum2Music>> {
   await app.use(popBalladStylePlugin);
   await app.use(classicalStylePlugin);
   await app.use(chiptuneStylePlugin);
+  await app.use(pianoSoloStylePlugin);
   await app.use(builtinSynthRendererPlugin);
   await app.use(motifDevelopmentComposerPlugin);
   return app;
@@ -119,7 +122,7 @@ async function runCreate(args: string[]): Promise<void> {
   const targetDir = resolve(values.dir ?? ".", name);
   await mkdir(join(targetDir, "src"), { recursive: true });
 
-  await Bun.write(
+  await writeFileData(
     join(targetDir, "package.json"),
     `${JSON.stringify(
       {
@@ -136,7 +139,7 @@ async function runCreate(args: string[]): Promise<void> {
     )}\n`,
   );
 
-  await Bun.write(
+  await writeFileData(
     join(targetDir, "tsconfig.json"),
     `${JSON.stringify(
       {
@@ -154,7 +157,7 @@ async function runCreate(args: string[]): Promise<void> {
     )}\n`,
   );
 
-  await Bun.write(
+  await writeFileData(
     join(targetDir, "src/index.ts"),
     `import type { Hum2MusicPlugin } from "@hum2music/plugin-api";
 
@@ -175,10 +178,16 @@ export default plugin;
   console.log(`Scaffolded a new plugin at ${targetDir}`);
 }
 
+/** Spawns `bun test` in the plugin's directory - inherently Bun-specific, since it runs Bun's own test runner (not a Node equivalent). */
 async function runTest(args: string[]): Promise<void> {
   const targetDir = args[0];
   if (!targetDir) {
     console.error("Usage: hum2music plugin test <path-to-plugin-dir>");
+    process.exit(1);
+  }
+
+  if (typeof Bun === "undefined") {
+    console.error('"hum2music plugin test" requires Bun (it runs the plugin\'s own `bun test` suite).');
     process.exit(1);
   }
 

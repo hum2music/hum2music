@@ -1,10 +1,10 @@
 #!/usr/bin/env bun
-import { runAnalyze } from "./commands/analyze";
-import { runCompose } from "./commands/compose";
-import { runGenerate } from "./commands/generate";
-import { runPlugin } from "./commands/plugin";
-import { runServe } from "./commands/serve";
-import { runTranscribe } from "./commands/transcribe";
+import { runAnalyze } from "./commands/analyze.ts";
+import { runCompose } from "./commands/compose.ts";
+import { runGenerate } from "./commands/generate.ts";
+import { runPlugin } from "./commands/plugin.ts";
+import { runServe } from "./commands/serve.ts";
+import { runTranscribe } from "./commands/transcribe.ts";
 
 async function main() {
   const [command, ...rest] = process.argv.slice(2);

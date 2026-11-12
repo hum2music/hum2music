@@ -17,9 +17,11 @@ import { COMPOSITION_SCHEMA_VERSION, type PluginComposition, type StyleDefinitio
 import { builtinSynthRendererPlugin } from "@hum2music/renderer-builtin-synth";
 import { createHum2Music, type Hum2MusicConfig } from "@hum2music/sdk";
 import { chiptuneStylePlugin } from "@hum2music/style-chiptune";
+import { pianoSoloStylePlugin } from "@hum2music/style-piano-solo";
 import { classicalStylePlugin } from "@hum2music/style-classical";
 import { popBalladStylePlugin } from "@hum2music/style-pop-ballad";
-import { loadPluginModule } from "../plugin-loader";
+import { readFileAsArrayBuffer, writeFileData } from "../fs-compat.ts";
+import { loadPluginModule } from "../plugin-loader.ts";
 
 const DEFAULT_SEED = 42;
 const DEFAULT_INSTRUMENTS = ["piano", "bass", "drums", "guitar"];
@@ -61,7 +63,7 @@ export async function runCompose(args: string[]): Promise<void> {
     process.exit(1);
   }
 
-  const buffer = await Bun.file(inputPath).arrayBuffer();
+  const buffer = await readFileAsArrayBuffer(inputPath);
   const { sampleRate, samples } = decodeWav(buffer);
   const denoisedSamples = reduceNoise(samples, sampleRate);
   const transcribedNotes = transcribeMelody(denoisedSamples, sampleRate);
@@ -82,6 +84,7 @@ export async function runCompose(args: string[]): Promise<void> {
   await app.use(popBalladStylePlugin);
   await app.use(classicalStylePlugin);
   await app.use(chiptuneStylePlugin);
+  await app.use(pianoSoloStylePlugin);
   await app.use(builtinSynthRendererPlugin);
   await app.use(motifDevelopmentComposerPlugin);
 
@@ -146,12 +149,12 @@ export async function runCompose(args: string[]): Promise<void> {
     programNumber: resolveProgramNumber(app, track.instrumentId, style),
   }));
   const midiBytes = writeMultiTrackMidiFile(midiTracks, { bpm: harmony.selectedBpm });
-  await Bun.write(outputPath, midiBytes);
+  await writeFileData(outputPath, midiBytes);
   console.log(`Wrote ${midiTracks.length} track(s) to ${outputPath}`);
 
   if (values.wav) {
     const audio = await app.render(compositionWithMelody, config.defaultRenderer ?? DEFAULT_RENDERER, { seed });
-    await Bun.write(values.wav, encodeWavPcm16(audio.samples[0], audio.sampleRate));
+    await writeFileData(values.wav, encodeWavPcm16(audio.samples[0], audio.sampleRate));
     console.log(`Wrote WAV preview to ${values.wav}`);
   }
 
@@ -230,7 +233,7 @@ async function runComposerOutput(
 
   const midiTracks: MidiTrack[] = [{ notes: noteEventsToMidiNotes(result.notes, harmony.selectedBpm), channel: 0 }];
   const midiBytes = writeMultiTrackMidiFile(midiTracks, { bpm: harmony.selectedBpm });
-  await Bun.write(outputPath, midiBytes);
+  await writeFileData(outputPath, midiBytes);
   console.log(`Wrote composer output (${result.sections.map((section) => section.label).join(" -> ")}) to ${outputPath}`);
 
   if (!wavPath) return;
@@ -242,7 +245,7 @@ async function runComposerOutput(
     sections: result.sections,
   };
   const audio = await app.render(composition, defaultRenderer ?? DEFAULT_RENDERER, { seed });
-  await Bun.write(wavPath, encodeWavPcm16(audio.samples[0], audio.sampleRate));
+  await writeFileData(wavPath, encodeWavPcm16(audio.samples[0], audio.sampleRate));
   console.log(`Wrote WAV preview to ${wavPath}`);
 }
 

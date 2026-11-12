@@ -3,6 +3,7 @@ import { decodeWav, reduceNoise, transcribeMelody } from "@hum2music/audio-analy
 import { analyzeHarmony, type TimedNote } from "@hum2music/harmony";
 import { humanizeMelody } from "@hum2music/expression";
 import { noteEventsToMidiNotes, writeStandardMidiFile } from "@hum2music/midi";
+import { readFileAsArrayBuffer, writeFileData } from "../fs-compat.ts";
 
 const DEFAULT_SEED = 42;
 
@@ -25,7 +26,7 @@ export async function runTranscribe(args: string[]): Promise<void> {
     process.exit(1);
   }
 
-  const buffer = await Bun.file(inputPath).arrayBuffer();
+  const buffer = await readFileAsArrayBuffer(inputPath);
   const { sampleRate, samples } = decodeWav(buffer);
   const denoisedSamples = reduceNoise(samples, sampleRate);
   const transcribedNotes = transcribeMelody(denoisedSamples, sampleRate);
@@ -47,7 +48,7 @@ export async function runTranscribe(args: string[]): Promise<void> {
           })),
         );
 
-  await Bun.write(outputPath, midiBytes);
+  await writeFileData(outputPath, midiBytes);
   console.log(`Wrote ${transcribedNotes.length} note(s) to ${outputPath}`);
 }
 

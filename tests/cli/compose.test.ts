@@ -102,6 +102,34 @@ describe("hum2music compose (CLI, routed through the Plugin API)", () => {
     }
   }, 20000);
 
+  test("--style piano-solo merges the melody into the piano's own track", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "hum2music-cli-compose-"));
+    try {
+      const inputPath = await writeScaleFixture(dir);
+      const soloPath = join(dir, "solo.mid");
+      const plainPath = join(dir, "plain.mid");
+
+      for (const [style, outputPath] of [
+        ["piano-solo", soloPath],
+        ["pop", plainPath],
+      ] as const) {
+        const proc = Bun.spawn(
+          ["bun", CLI_ENTRY, "compose", inputPath, "-o", outputPath, "--instruments", "piano", "--style", style],
+          { stdout: "pipe", stderr: "pipe" },
+        );
+        expect(await proc.exited).toBe(0);
+      }
+
+      // Both produce tempo + melody + piano, but the piano-solo track also
+      // contains the melody pitches merged in, so it has more note-on events.
+      const soloBytes = await Bun.file(soloPath).arrayBuffer();
+      const plainBytes = await Bun.file(plainPath).arrayBuffer();
+      expect(soloBytes.byteLength).toBeGreaterThan(plainBytes.byteLength);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  }, 20000);
+
   test("--orchestrate routes the ensemble through assignRoles + the Counterpoint Engine", async () => {
     const dir = await mkdtemp(join(tmpdir(), "hum2music-cli-compose-"));
     try {

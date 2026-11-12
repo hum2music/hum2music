@@ -21,6 +21,7 @@ import {
   type PitchedRenderNote,
   type Timbre,
 } from "@hum2music/rendering";
+import { readFileAsArrayBuffer, writeFileData } from "../fs-compat.ts";
 
 const DEFAULT_SEED = 42;
 
@@ -49,7 +50,7 @@ export async function runGenerate(args: string[]): Promise<void> {
     process.exit(1);
   }
 
-  const buffer = await Bun.file(inputPath).arrayBuffer();
+  const buffer = await readFileAsArrayBuffer(inputPath);
   const { sampleRate, samples } = decodeWav(buffer);
   const denoisedSamples = reduceNoise(samples, sampleRate);
   const transcribedNotes = transcribeMelody(denoisedSamples, sampleRate);
@@ -87,12 +88,12 @@ export async function runGenerate(args: string[]): Promise<void> {
     programNumber: track.programNumber,
   }));
   const midiBytes = writeMultiTrackMidiFile(midiTracks, { bpm: selectedBpm });
-  await Bun.write(outputPath, midiBytes);
+  await writeFileData(outputPath, midiBytes);
   console.log(`Wrote ${midiTracks.length} track(s) to ${outputPath}`);
 
   if (values.wav) {
     const wavBytes = renderTracksToWav(tracks, selectedBpm, seed);
-    await Bun.write(values.wav, wavBytes);
+    await writeFileData(values.wav, wavBytes);
     console.log(`Wrote WAV preview to ${values.wav}`);
   }
 }

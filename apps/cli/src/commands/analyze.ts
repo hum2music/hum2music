@@ -1,6 +1,7 @@
 import { parseArgs } from "node:util";
 import { decodeWav, reduceNoise, transcribeMelody } from "@hum2music/audio-analysis";
 import { analyzeHarmony, type TimedNote } from "@hum2music/harmony";
+import { readFileAsArrayBuffer } from "../fs-compat.ts";
 
 export async function runAnalyze(args: string[]): Promise<void> {
   const { values, positionals } = parseArgs({
@@ -21,7 +22,7 @@ export async function runAnalyze(args: string[]): Promise<void> {
 
   const overrideBpm = values.bpm ? Number(values.bpm) : undefined;
 
-  const buffer = await Bun.file(inputPath).arrayBuffer();
+  const buffer = await readFileAsArrayBuffer(inputPath);
   const { sampleRate, samples } = decodeWav(buffer);
   const denoisedSamples = reduceNoise(samples, sampleRate);
   const transcribedNotes = transcribeMelody(denoisedSamples, sampleRate);

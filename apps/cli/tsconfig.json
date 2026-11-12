@@ -24,6 +24,7 @@
     { "path": "../../plugins/styles/pop-ballad" },
     { "path": "../../plugins/styles/classical" },
     { "path": "../../plugins/styles/chiptune" },
+    { "path": "../../plugins/styles/piano-solo" },
     { "path": "../../packages/orchestration" },
     { "path": "../../plugins/composers/motif-development" },
     { "path": "../../plugins/renderers/builtin-synth" },
