@@ -7,6 +7,19 @@ import { readFileAsArrayBuffer, writeFileData } from "../fs-compat.ts";
 
 const DEFAULT_SEED = 42;
 
+const HELP = `Usage: hum2music transcribe <input.wav> -o <output.mid> [options]
+
+Transcribe a hummed WAV recording into a single-track Standard MIDI File melody.
+
+Options:
+  -o, --output <file>   Output .mid file path (required)
+      --humanize <0-1>  Apply rule-based timing/velocity humanization (default: none)
+      --seed <number>   Seed for deterministic humanization (default: ${DEFAULT_SEED})
+  -h, --help            Show this help message
+
+Example:
+  hum2music transcribe input.wav -o melody.mid --humanize 0.5`;
+
 export async function runTranscribe(args: string[]): Promise<void> {
   const { values, positionals } = parseArgs({
     args,
@@ -14,15 +27,21 @@ export async function runTranscribe(args: string[]): Promise<void> {
       output: { type: "string", short: "o" },
       humanize: { type: "string" },
       seed: { type: "string" },
+      help: { type: "boolean", short: "h", default: false },
     },
     allowPositionals: true,
   });
+
+  if (values.help) {
+    console.log(HELP);
+    return;
+  }
 
   const inputPath = positionals[0];
   const outputPath = values.output;
 
   if (!inputPath || !outputPath) {
-    console.error("Usage: hum2music transcribe <input.wav> -o <output.mid> [--humanize <0-1>] [--seed <number>]");
+    console.error(HELP);
     process.exit(1);
   }
 

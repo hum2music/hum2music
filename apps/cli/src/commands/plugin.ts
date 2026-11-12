@@ -23,10 +23,16 @@ import { loadPluginModule } from "../plugin-loader.ts";
 
 const USAGE = [
   "Usage: hum2music plugin <subcommand>",
-  "  hum2music plugin list",
-  "  hum2music plugin validate <path-to-plugin-module>",
-  "  hum2music plugin create <name> [--dir <output-dir>]",
-  "  hum2music plugin test <path-to-plugin-dir>",
+  "",
+  "List, validate, scaffold, and test Hum2Music plugins.",
+  "",
+  "Subcommands:",
+  "  list                                List the registered built-in plugins",
+  "  validate <path-to-plugin-module>    Load a plugin module and check it registers cleanly",
+  "  create <name> [--dir <output-dir>]  Scaffold a new plugin's package.json/tsconfig.json/src/index.ts",
+  "  test <path-to-plugin-dir>           Run the plugin's own `bun test` suite (requires Bun)",
+  "",
+  "Run `hum2music plugin <subcommand> --help` for details on a specific subcommand.",
 ].join("\n");
 
 /** PRD UPDATE_PRD.md §10.2's "プラグイン作成ツール" CLI commands. */
@@ -34,6 +40,12 @@ export async function runPlugin(args: string[]): Promise<void> {
   const [subcommand, ...rest] = args;
 
   switch (subcommand) {
+    case undefined:
+    case "help":
+    case "--help":
+    case "-h":
+      console.log(USAGE);
+      return;
     case "list":
       await runList();
       return;
@@ -47,7 +59,7 @@ export async function runPlugin(args: string[]): Promise<void> {
       await runTest(rest);
       return;
     default:
-      console.error(`Unknown "plugin" subcommand: ${subcommand ?? "(none)"}`);
+      console.error(`Unknown "plugin" subcommand: "${subcommand}"\n`);
       console.error(USAGE);
       process.exit(1);
   }
@@ -81,10 +93,20 @@ async function runList(): Promise<void> {
   await app.dispose();
 }
 
+const VALIDATE_HELP =
+  "Usage: hum2music plugin validate <path-to-plugin-module>\n\n" +
+  "Load a plugin module, register it against a fresh host, and report whether it\n" +
+  "registers cleanly (id/apiVersion/instrument validation).";
+
 async function runValidate(args: string[]): Promise<void> {
+  if (args[0] === "--help" || args[0] === "-h") {
+    console.log(VALIDATE_HELP);
+    return;
+  }
+
   const modulePath = args[0];
   if (!modulePath) {
-    console.error("Usage: hum2music plugin validate <path-to-plugin-module>");
+    console.error(VALIDATE_HELP);
     process.exit(1);
   }
 
@@ -115,11 +137,29 @@ async function runValidate(args: string[]): Promise<void> {
   await app.dispose();
 }
 
+const CREATE_HELP = `Usage: hum2music plugin create <name> [--dir <output-dir>]
+
+Scaffold a new plugin's package.json, tsconfig.json, and src/index.ts.
+
+Options:
+      --dir <dir>  Parent directory to create the plugin in (default: current directory)
+  -h, --help       Show this help message`;
+
 async function runCreate(args: string[]): Promise<void> {
-  const { values, positionals } = parseArgs({ args, options: { dir: { type: "string" } }, allowPositionals: true });
+  const { values, positionals } = parseArgs({
+    args,
+    options: { dir: { type: "string" }, help: { type: "boolean", short: "h", default: false } },
+    allowPositionals: true,
+  });
+
+  if (values.help) {
+    console.log(CREATE_HELP);
+    return;
+  }
+
   const name = positionals[0];
   if (!name) {
-    console.error("Usage: hum2music plugin create <name> [--dir <output-dir>]");
+    console.error(CREATE_HELP);
     process.exit(1);
   }
 
@@ -182,11 +222,20 @@ export default plugin;
   console.log(`Scaffolded a new plugin at ${targetDir}`);
 }
 
+const TEST_HELP =
+  "Usage: hum2music plugin test <path-to-plugin-dir>\n\n" +
+  "Run the plugin's own `bun test` suite (requires Bun; there is no Node equivalent).";
+
 /** Spawns `bun test` in the plugin's directory - inherently Bun-specific, since it runs Bun's own test runner (not a Node equivalent). */
 async function runTest(args: string[]): Promise<void> {
+  if (args[0] === "--help" || args[0] === "-h") {
+    console.log(TEST_HELP);
+    return;
+  }
+
   const targetDir = args[0];
   if (!targetDir) {
-    console.error("Usage: hum2music plugin test <path-to-plugin-dir>");
+    console.error(TEST_HELP);
     process.exit(1);
   }
 

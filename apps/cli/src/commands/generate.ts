@@ -25,6 +25,26 @@ import { readFileAsArrayBuffer, writeFileData } from "../fs-compat.ts";
 
 const DEFAULT_SEED = 42;
 
+const HELP = `Usage: hum2music generate <input.wav> -o <song.mid> [options]
+
+Transcribe and arrange a hummed WAV into a multi-track MIDI/WAV song, using the
+fixed built-in instrument set (piano/bass/drums/guitar). For a pluggable
+instrument/style/composer/renderer pipeline, see \`hum2music compose --help\`.
+
+Options:
+  -o, --output <file>         Output .mid file path (required)
+      --wav <file>            Also render and write a WAV preview
+      --instruments <list>    Comma-separated subset of piano,bass,drums,guitar (default: all)
+      --style <id>            pop|ballad (default: pop)
+      --song-structure        Vary humanize intensity by detected song section
+      --humanize <0-1>        Apply rule-based timing/velocity humanization (default: none)
+      --seed <number>         Seed for deterministic humanization (default: ${DEFAULT_SEED})
+      --bpm <number>          Override tempo detection with a fixed BPM
+  -h, --help                  Show this help message
+
+Example:
+  hum2music generate input.wav -o song.mid --wav song.wav --style ballad --humanize 0.5`;
+
 export async function runGenerate(args: string[]): Promise<void> {
   const { values, positionals } = parseArgs({
     args,
@@ -37,16 +57,20 @@ export async function runGenerate(args: string[]): Promise<void> {
       bpm: { type: "string" },
       style: { type: "string" },
       "song-structure": { type: "boolean", default: false },
+      help: { type: "boolean", short: "h", default: false },
     },
     allowPositionals: true,
   });
 
+  if (values.help) {
+    console.log(HELP);
+    return;
+  }
+
   const inputPath = positionals[0];
   const outputPath = values.output;
   if (!inputPath || !outputPath) {
-    console.error(
-      "Usage: hum2music generate <input.wav> -o <song.mid> [--wav <song.wav>] [--instruments piano,bass,drums,guitar] [--style pop|ballad] [--song-structure] [--humanize <0-1>] [--seed <number>] [--bpm <number>]",
-    );
+    console.error(HELP);
     process.exit(1);
   }
 

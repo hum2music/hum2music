@@ -41,6 +41,32 @@ const CHANNELS: Record<string, number> = { piano: 1, bass: 2, drums: 9, guitar: 
  * new instrument plugin (e.g. a third-party violin package) doesn't
  * require touching this command.
  */
+const HELP = `Usage: hum2music compose <input.wav> -o <song.mid> [options]
+
+Transcribe and arrange a hummed WAV into a multi-track MIDI/WAV song, routed
+through the Plugin API: instruments, styles, composers, and renderers all
+resolve from the registered plugin set (built-ins plus anything listed in
+./hum2music.config.ts), rather than a fixed instrument list.
+
+Options:
+  -o, --output <file>       Output .mid file path (required)
+      --wav <file>          Also render and write a WAV preview
+      --instruments <list>  Comma-separated instrument ids, e.g. piano,violin,viola,cello,bass,drums,guitar
+                             (default: piano,bass,drums,guitar)
+      --style <id>          pop|ballad|classical|chiptune|piano-solo
+      --orchestrate         Assign ensemble roles (melody/bass/harmony/countermelody) via the Orchestration Engine
+      --composer <id>       Bypass the Arranger pipeline and run a ComposerPlugin instead: motif-development|chorale
+      --humanize <0-1>      Apply rule-based timing/velocity humanization, tied to song structure (default: none)
+      --renderer <id>       builtin-synth|soundfont (default: builtin-synth)
+      --soundfont <file>    .sf2 file to use with --renderer soundfont
+      --seed <number>       Seed for deterministic humanization (default: ${DEFAULT_SEED})
+      --bpm <number>        Override tempo detection with a fixed BPM
+  -h, --help                Show this help message
+
+Examples:
+  hum2music compose input.wav -o song.mid --style classical --instruments piano,violin,viola,cello --orchestrate
+  hum2music compose input.wav -o song.mid --wav song.wav --renderer soundfont --soundfont piano.sf2`;
+
 export async function runCompose(args: string[]): Promise<void> {
   const { values, positionals } = parseArgs({
     args,
@@ -56,16 +82,20 @@ export async function runCompose(args: string[]): Promise<void> {
       humanize: { type: "string" },
       renderer: { type: "string" },
       soundfont: { type: "string" },
+      help: { type: "boolean", short: "h", default: false },
     },
     allowPositionals: true,
   });
 
+  if (values.help) {
+    console.log(HELP);
+    return;
+  }
+
   const inputPath = positionals[0];
   const outputPath = values.output;
   if (!inputPath || !outputPath) {
-    console.error(
-      "Usage: hum2music compose <input.wav> -o <song.mid> [--wav <song.wav>] [--instruments piano,violin,viola,cello,bass,drums,guitar] [--style pop|ballad|classical|chiptune] [--orchestrate] [--composer motif-development|chorale] [--humanize <0-1>] [--renderer builtin-synth|soundfont] [--soundfont <file.sf2>] [--seed <number>] [--bpm <number>]",
-    );
+    console.error(HELP);
     process.exit(1);
   }
 

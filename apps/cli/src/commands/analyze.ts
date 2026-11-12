@@ -3,6 +3,19 @@ import { decodeWav, reduceNoise, transcribeMelody } from "@hum2music/audio-analy
 import { analyzeHarmony, type TimedNote } from "@hum2music/harmony";
 import { readFileAsArrayBuffer } from "../fs-compat.ts";
 
+const HELP = `Usage: hum2music analyze <input.wav> [options]
+
+Print tempo/key/chord analysis for a hummed WAV recording, without writing any output file.
+
+Options:
+      --chords        Also print the estimated chord progression and song structure
+      --json          Print the full analysis as JSON instead of a human-readable summary
+      --bpm <number>  Override tempo detection with a fixed BPM
+  -h, --help          Show this help message
+
+Example:
+  hum2music analyze input.wav --chords`;
+
 export async function runAnalyze(args: string[]): Promise<void> {
   const { values, positionals } = parseArgs({
     args,
@@ -10,13 +23,19 @@ export async function runAnalyze(args: string[]): Promise<void> {
       chords: { type: "boolean", default: false },
       json: { type: "boolean", default: false },
       bpm: { type: "string" },
+      help: { type: "boolean", short: "h", default: false },
     },
     allowPositionals: true,
   });
 
+  if (values.help) {
+    console.log(HELP);
+    return;
+  }
+
   const inputPath = positionals[0];
   if (!inputPath) {
-    console.error("Usage: hum2music analyze <input.wav> [--chords] [--json] [--bpm <number>]");
+    console.error(HELP);
     process.exit(1);
   }
 

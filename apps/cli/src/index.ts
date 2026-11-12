@@ -5,11 +5,18 @@ import { runGenerate } from "./commands/generate.ts";
 import { runPlugin } from "./commands/plugin.ts";
 import { runServe } from "./commands/serve.ts";
 import { runTranscribe } from "./commands/transcribe.ts";
+import { printTopLevelHelp } from "./help.ts";
 
 async function main() {
   const [command, ...rest] = process.argv.slice(2);
 
   switch (command) {
+    case undefined:
+    case "help":
+    case "--help":
+    case "-h":
+      printTopLevelHelp();
+      return;
     case "transcribe":
       await runTranscribe(rest);
       return;
@@ -29,8 +36,8 @@ async function main() {
       await runServe(rest);
       return;
     default:
-      console.error(`Unknown command: ${command ?? "(none)"}`);
-      console.error("Usage: hum2music transcribe <input.wav> -o <output.mid>");
+      console.error(`Unknown command: "${command}"\n`);
+      printTopLevelHelp();
       process.exit(1);
   }
 }
