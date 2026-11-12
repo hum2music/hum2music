@@ -1,0 +1,14 @@
+{
+  "name": "@hum2music/style-piano-solo",
+  "version": "0.1.0",
+  "description": "Piano Solo Style plugin: melody (right hand) + chord voicing (left hand) merged into a single piano track, rather than chords-only accompaniment.",
+  "license": "Apache-2.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "files": ["src"],
+  "dependencies": {
+    "@hum2music/plugin-api": "workspace:*"
+  }
+}

@@ -10,6 +10,7 @@
   "files": ["src"],
   "dependencies": {
     "@hum2music/arrangement": "workspace:*",
+    "@hum2music/core": "workspace:*",
     "@hum2music/plugin-api": "workspace:*"
   }
 }

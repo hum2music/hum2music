@@ -31,6 +31,7 @@
         "@hum2music/sdk": "workspace:*",
         "@hum2music/style-chiptune": "workspace:*",
         "@hum2music/style-classical": "workspace:*",
+        "@hum2music/style-piano-solo": "workspace:*",
         "@hum2music/style-pop-ballad": "workspace:*",
         "@hum2music/testing": "workspace:*",
         "@hum2music/web": "workspace:*",
@@ -64,6 +65,7 @@
         "@hum2music/sdk": "workspace:*",
         "@hum2music/style-chiptune": "workspace:*",
         "@hum2music/style-classical": "workspace:*",
+        "@hum2music/style-piano-solo": "workspace:*",
         "@hum2music/style-pop-ballad": "workspace:*",
         "@hum2music/testing": "workspace:*",
         "@hum2music/web": "workspace:*",
@@ -90,6 +92,7 @@
         "@hum2music/sdk": "workspace:*",
         "@hum2music/style-chiptune": "workspace:*",
         "@hum2music/style-classical": "workspace:*",
+        "@hum2music/style-piano-solo": "workspace:*",
         "@hum2music/style-pop-ballad": "workspace:*",
       },
     },
@@ -254,6 +257,7 @@
       "version": "0.1.0",
       "dependencies": {
         "@hum2music/arrangement": "workspace:*",
+        "@hum2music/core": "workspace:*",
         "@hum2music/plugin-api": "workspace:*",
       },
     },
@@ -292,6 +296,13 @@
     },
     "plugins/styles/classical": {
       "name": "@hum2music/style-classical",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hum2music/plugin-api": "workspace:*",
+      },
+    },
+    "plugins/styles/piano-solo": {
+      "name": "@hum2music/style-piano-solo",
       "version": "0.1.0",
       "dependencies": {
         "@hum2music/plugin-api": "workspace:*",
@@ -358,6 +369,8 @@
     "@hum2music/style-chiptune": ["@hum2music/style-chiptune@workspace:plugins/styles/chiptune"],
 
     "@hum2music/style-classical": ["@hum2music/style-classical@workspace:plugins/styles/classical"],
+
+    "@hum2music/style-piano-solo": ["@hum2music/style-piano-solo@workspace:plugins/styles/piano-solo"],
 
     "@hum2music/style-pop-ballad": ["@hum2music/style-pop-ballad@workspace:plugins/styles/pop-ballad"],
 

@@ -1,3 +1,4 @@
+import type { NoteEvent } from "@hum2music/core";
 import { generatePianoArrangement } from "@hum2music/arrangement";
 import type { Hum2MusicPlugin, InstrumentArranger } from "@hum2music/plugin-api";
 
@@ -11,9 +12,22 @@ export const pianoArranger: InstrumentArranger = {
   async arrange(context) {
     const pattern = context.style?.orchestration?.pianoPattern ?? "block";
     const allowExtensions = context.style?.orchestration?.pianoAllowExtensions ?? false;
-    return generatePianoArrangement(context.chords, { pattern, allowExtensions });
+    const voicing = generatePianoArrangement(context.chords, { pattern, allowExtensions });
+
+    if (!context.style?.orchestration?.pianoIncludeMelody || context.melody.length === 0) {
+      return voicing;
+    }
+
+    // Piano-solo texture: the input melody (right hand) layered over the
+    // chord voicing (left hand) in this one instrument's track, rather
+    // than chords-only accompaniment expecting a separate melody track.
+    return mergeNotesByTime(voicing, context.melody);
   },
 };
+
+function mergeNotesByTime(a: NoteEvent[], b: NoteEvent[]): NoteEvent[] {
+  return [...a, ...b].sort((left, right) => left.startBeat - right.startBeat);
+}
 
 /**
  * Compatibility wrapper registering the existing (pre-plugin-system) piano

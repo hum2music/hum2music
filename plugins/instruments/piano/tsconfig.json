@@ -5,5 +5,9 @@
     "rootDir": "./src"
   },
   "include": ["src"],
-  "references": [{ "path": "../../../packages/arrangement" }, { "path": "../../../packages/plugin-api" }]
+  "references": [
+    { "path": "../../../packages/arrangement" },
+    { "path": "../../../packages/core" },
+    { "path": "../../../packages/plugin-api" }
+  ]
 }

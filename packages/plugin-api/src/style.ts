@@ -23,6 +23,8 @@ export interface FormPolicy {
 export interface OrchestrationPolicy {
   pianoPattern?: "block" | "arpeggio";
   pianoAllowExtensions?: boolean;
+  /** When true, the piano arranger merges the input melody into its own track (right hand) alongside its chord voicing (left hand) — a true piano-solo texture, rather than chords-only accompaniment. */
+  pianoIncludeMelody?: boolean;
   /** Instrument ID -> GM program number, overriding that instrument's own InstrumentDefinition.midi.program for this style only. */
   programNumbers?: Record<string, number>;
   [key: string]: unknown;
