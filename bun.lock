@@ -39,7 +39,7 @@
         "@hum2music/testing": "workspace:*",
         "@hum2music/web": "workspace:*",
         "@types/bun": "latest",
-        "typescript": "^5.7.0",
+        "typescript": "^5.9.3",
       },
     },
     "apps/cli": {
