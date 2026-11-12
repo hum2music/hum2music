@@ -28,6 +28,10 @@
     "@hum2music/testing": "workspace:*",
     "@hum2music/instrument-piano": "workspace:*",
     "@hum2music/instrument-violin": "workspace:*",
+    "@hum2music/instrument-bass": "workspace:*",
+    "@hum2music/instrument-drums": "workspace:*",
+    "@hum2music/instrument-guitar": "workspace:*",
+    "@hum2music/style-pop-ballad": "workspace:*",
     "@hum2music/renderer-builtin-synth": "workspace:*"
   }
 }

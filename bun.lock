@@ -10,6 +10,9 @@
         "@hum2music/core": "workspace:*",
         "@hum2music/expression": "workspace:*",
         "@hum2music/harmony": "workspace:*",
+        "@hum2music/instrument-bass": "workspace:*",
+        "@hum2music/instrument-drums": "workspace:*",
+        "@hum2music/instrument-guitar": "workspace:*",
         "@hum2music/instrument-piano": "workspace:*",
         "@hum2music/instrument-violin": "workspace:*",
         "@hum2music/midi": "workspace:*",
@@ -19,6 +22,7 @@
         "@hum2music/renderer-builtin-synth": "workspace:*",
         "@hum2music/rendering": "workspace:*",
         "@hum2music/sdk": "workspace:*",
+        "@hum2music/style-pop-ballad": "workspace:*",
         "@hum2music/testing": "workspace:*",
         "@hum2music/web": "workspace:*",
         "@types/bun": "latest",
@@ -36,8 +40,16 @@
         "@hum2music/audio-analysis": "workspace:*",
         "@hum2music/expression": "workspace:*",
         "@hum2music/harmony": "workspace:*",
+        "@hum2music/instrument-bass": "workspace:*",
+        "@hum2music/instrument-drums": "workspace:*",
+        "@hum2music/instrument-guitar": "workspace:*",
+        "@hum2music/instrument-piano": "workspace:*",
+        "@hum2music/instrument-violin": "workspace:*",
         "@hum2music/midi": "workspace:*",
+        "@hum2music/renderer-builtin-synth": "workspace:*",
         "@hum2music/rendering": "workspace:*",
+        "@hum2music/sdk": "workspace:*",
+        "@hum2music/style-pop-ballad": "workspace:*",
         "@hum2music/web": "workspace:*",
       },
     },
@@ -138,6 +150,30 @@
         "@hum2music/plugin-host": "workspace:*",
       },
     },
+    "plugins/instruments/bass": {
+      "name": "@hum2music/instrument-bass",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hum2music/arrangement": "workspace:*",
+        "@hum2music/plugin-api": "workspace:*",
+      },
+    },
+    "plugins/instruments/drums": {
+      "name": "@hum2music/instrument-drums",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hum2music/arrangement": "workspace:*",
+        "@hum2music/plugin-api": "workspace:*",
+      },
+    },
+    "plugins/instruments/guitar": {
+      "name": "@hum2music/instrument-guitar",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hum2music/arrangement": "workspace:*",
+        "@hum2music/plugin-api": "workspace:*",
+      },
+    },
     "plugins/instruments/piano": {
       "name": "@hum2music/instrument-piano",
       "version": "0.1.0",
@@ -164,6 +200,14 @@
         "@hum2music/rendering": "workspace:*",
       },
     },
+    "plugins/styles/pop-ballad": {
+      "name": "@hum2music/style-pop-ballad",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hum2music/arrangement": "workspace:*",
+        "@hum2music/plugin-api": "workspace:*",
+      },
+    },
   },
   "packages": {
     "@hum2music/arrangement": ["@hum2music/arrangement@workspace:packages/arrangement"],
@@ -175,6 +219,12 @@
     "@hum2music/expression": ["@hum2music/expression@workspace:packages/expression"],
 
     "@hum2music/harmony": ["@hum2music/harmony@workspace:packages/harmony"],
+
+    "@hum2music/instrument-bass": ["@hum2music/instrument-bass@workspace:plugins/instruments/bass"],
+
+    "@hum2music/instrument-drums": ["@hum2music/instrument-drums@workspace:plugins/instruments/drums"],
+
+    "@hum2music/instrument-guitar": ["@hum2music/instrument-guitar@workspace:plugins/instruments/guitar"],
 
     "@hum2music/instrument-piano": ["@hum2music/instrument-piano@workspace:plugins/instruments/piano"],
 
@@ -193,6 +243,8 @@
     "@hum2music/rendering": ["@hum2music/rendering@workspace:packages/rendering"],
 
     "@hum2music/sdk": ["@hum2music/sdk@workspace:packages/sdk"],
+
+    "@hum2music/style-pop-ballad": ["@hum2music/style-pop-ballad@workspace:plugins/styles/pop-ballad"],
 
     "@hum2music/testing": ["@hum2music/testing@workspace:packages/testing"],
 

@@ -1,0 +1,15 @@
+{
+  "name": "@hum2music/style-pop-ballad",
+  "version": "0.1.0",
+  "description": "Pop and Ballad Style plugins: a compatibility wrapper around @hum2music/arrangement's existing style profiles.",
+  "license": "Apache-2.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "files": ["src"],
+  "dependencies": {
+    "@hum2music/arrangement": "workspace:*",
+    "@hum2music/plugin-api": "workspace:*"
+  }
+}

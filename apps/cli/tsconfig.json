@@ -12,6 +12,14 @@
     { "path": "../../packages/expression" },
     { "path": "../../packages/arrangement" },
     { "path": "../../packages/rendering" },
+    { "path": "../../packages/sdk" },
+    { "path": "../../plugins/instruments/piano" },
+    { "path": "../../plugins/instruments/violin" },
+    { "path": "../../plugins/instruments/bass" },
+    { "path": "../../plugins/instruments/drums" },
+    { "path": "../../plugins/instruments/guitar" },
+    { "path": "../../plugins/styles/pop-ballad" },
+    { "path": "../../plugins/renderers/builtin-synth" },
     { "path": "../../apps/web" }
   ]
 }

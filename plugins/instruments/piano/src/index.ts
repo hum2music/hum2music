@@ -9,7 +9,9 @@ export const pianoArranger: InstrumentArranger = {
   id: "@hum2music/instrument-piano/arranger",
   instrumentId: "piano",
   async arrange(context) {
-    return generatePianoArrangement(context.chords, { pattern: "block", allowExtensions: false });
+    const pattern = context.style?.orchestration?.pianoPattern ?? "block";
+    const allowExtensions = context.style?.orchestration?.pianoAllowExtensions ?? false;
+    return generatePianoArrangement(context.chords, { pattern, allowExtensions });
   },
 };
 

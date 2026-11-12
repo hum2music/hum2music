@@ -33,6 +33,11 @@ export async function compose(context: PluginContext, options: ComposeOptions): 
   const tracks: PluginComposition["tracks"] = [];
   const otherTracks = new Map<string, NoteEvent[]>();
 
+  const style = options.style ? context.styles.get(options.style) : undefined;
+  if (options.style && !style) {
+    throw new Error(`No StyleDefinition registered for style id "${options.style}".`);
+  }
+
   for (const instrumentId of options.instruments) {
     const instrument = context.instruments.get(instrumentId);
     if (!instrument) {
@@ -51,7 +56,7 @@ export async function compose(context: PluginContext, options: ComposeOptions): 
       bpm: options.bpm,
       sections,
       instrument,
-      style: options.style,
+      style,
       otherTracks,
       seed,
     };

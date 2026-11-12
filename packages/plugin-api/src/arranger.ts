@@ -1,5 +1,6 @@
 import type { ChordEvent, KeyCandidate, NoteEvent, SongSection } from "@hum2music/core";
 import type { InstrumentDefinition } from "./instrument";
+import type { StyleDefinition } from "./style";
 
 /**
  * Everything an Arranger Plugin can read while generating notes for its
@@ -14,7 +15,7 @@ export interface ArrangementContext {
   bpm: number;
   sections: SongSection[];
   instrument: InstrumentDefinition;
-  style?: string;
+  style?: StyleDefinition;
   /** Tracks already produced earlier in this compose() call, keyed by instrument ID. */
   otherTracks: ReadonlyMap<string, NoteEvent[]>;
   seed: number;

@@ -4,6 +4,7 @@ import { violinInstrumentPlugin } from "@hum2music/instrument-violin";
 import type { ChordEvent } from "@hum2music/core";
 import { builtinSynthRendererPlugin } from "@hum2music/renderer-builtin-synth";
 import { createHum2Music } from "@hum2music/sdk";
+import { popBalladStylePlugin } from "@hum2music/style-pop-ballad";
 
 const CHORDS: ChordEvent[] = [
   { symbol: "C", startBeat: 0, durationBeats: 4, confidence: 1 },
@@ -54,6 +55,34 @@ describe("createHum2Music", () => {
     await expect(app.compose({ melody: [], chords: CHORDS, bpm: 120, instruments: ["cello"] })).rejects.toThrow(
       /No InstrumentDefinition registered/,
     );
+  });
+
+  test("resolves a registered style and passes it to each arranger", async () => {
+    const app = createHum2Music();
+    await app.use(pianoInstrumentPlugin);
+    await app.use(popBalladStylePlugin);
+
+    const block = await app.compose({ melody: [], chords: CHORDS, bpm: 120, instruments: ["piano"], style: "pop" });
+    const arpeggio = await app.compose({ melody: [], chords: CHORDS, bpm: 120, instruments: ["piano"], style: "ballad" });
+
+    // Pop uses a block-chord pattern, Ballad an arpeggio (and allows the 9th)
+    // — different enough that note counts should differ.
+    expect(block.tracks[0].notes.length).not.toBe(arpeggio.tracks[0].notes.length);
+  });
+
+  test("getStyle looks up a registered style's full definition", async () => {
+    const app = createHum2Music();
+    await app.use(popBalladStylePlugin);
+    expect(app.getStyle("pop")?.rhythm?.drumDensity).toBe("normal");
+    expect(app.getStyle("unknown")).toBeUndefined();
+  });
+
+  test("throws a clear error for an unregistered style id", async () => {
+    const app = createHum2Music();
+    await app.use(pianoInstrumentPlugin);
+    await expect(
+      app.compose({ melody: [], chords: CHORDS, bpm: 120, instruments: ["piano"], style: "classical" }),
+    ).rejects.toThrow(/No StyleDefinition registered/);
   });
 
   test("renders a composition through a registered AudioRenderer", async () => {
