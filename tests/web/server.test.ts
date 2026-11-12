@@ -232,12 +232,14 @@ describe("GET /api/plugins", () => {
     const body = await response.json();
     expect(body.instruments.map((i: { id: string }) => i.id).sort()).toEqual([
       "bass",
+      "cello",
       "drums",
       "guitar",
       "piano",
+      "viola",
       "violin",
     ]);
-    expect(body.styles.map((s: { id: string }) => s.id).sort()).toEqual(["ballad", "pop"]);
+    expect(body.styles.map((s: { id: string }) => s.id).sort()).toEqual(["ballad", "classical", "pop"]);
     expect(body.renderers).toEqual(["builtin-synth"]);
   });
 });

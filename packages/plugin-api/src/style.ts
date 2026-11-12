@@ -23,6 +23,8 @@ export interface FormPolicy {
 export interface OrchestrationPolicy {
   pianoPattern?: "block" | "arpeggio";
   pianoAllowExtensions?: boolean;
+  /** Instrument ID -> GM program number, overriding that instrument's own InstrumentDefinition.midi.program for this style only. */
+  programNumbers?: Record<string, number>;
   [key: string]: unknown;
 }
 export interface ExpressionPolicy {

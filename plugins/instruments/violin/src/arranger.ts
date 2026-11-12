@@ -1,5 +1,5 @@
 import type { NoteEvent } from "@hum2music/core";
-import { chordPitchClasses, parseChordSymbol } from "@hum2music/music-theory";
+import { chordPitchClasses, closestToneInRange, parseChordSymbol } from "@hum2music/music-theory";
 import type { ArrangementContext, InstrumentArranger } from "@hum2music/plugin-api";
 
 const VELOCITY = 80;
@@ -34,28 +34,3 @@ export const violinArranger: InstrumentArranger = {
     return notes;
   },
 };
-
-function closestToneInRange(
-  toneClasses: number[],
-  previousPitch: number,
-  range: { min: number; max: number },
-): number {
-  let best = previousPitch;
-  let bestDistance = Infinity;
-
-  const firstOctaveBase = range.min - (((range.min % 12) + 12) % 12);
-  for (const toneClass of toneClasses) {
-    for (let octaveBase = firstOctaveBase; octaveBase <= range.max; octaveBase += 12) {
-      const candidate = octaveBase + toneClass;
-      if (candidate < range.min || candidate > range.max) continue;
-
-      const distance = Math.abs(candidate - previousPitch);
-      if (distance < bestDistance) {
-        bestDistance = distance;
-        best = candidate;
-      }
-    }
-  }
-
-  return best;
-}

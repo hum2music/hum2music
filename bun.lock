@@ -8,21 +8,27 @@
         "@hum2music/arrangement": "workspace:*",
         "@hum2music/audio-analysis": "workspace:*",
         "@hum2music/core": "workspace:*",
+        "@hum2music/counterpoint": "workspace:*",
         "@hum2music/expression": "workspace:*",
+        "@hum2music/form": "workspace:*",
         "@hum2music/harmony": "workspace:*",
         "@hum2music/instrument-bass": "workspace:*",
+        "@hum2music/instrument-cello": "workspace:*",
         "@hum2music/instrument-drums": "workspace:*",
         "@hum2music/instrument-guitar": "workspace:*",
         "@hum2music/instrument-piano": "workspace:*",
+        "@hum2music/instrument-viola": "workspace:*",
         "@hum2music/instrument-violin": "workspace:*",
         "@hum2music/midi": "workspace:*",
         "@hum2music/motif": "workspace:*",
         "@hum2music/music-theory": "workspace:*",
+        "@hum2music/orchestration": "workspace:*",
         "@hum2music/plugin-api": "workspace:*",
         "@hum2music/plugin-host": "workspace:*",
         "@hum2music/renderer-builtin-synth": "workspace:*",
         "@hum2music/rendering": "workspace:*",
         "@hum2music/sdk": "workspace:*",
+        "@hum2music/style-classical": "workspace:*",
         "@hum2music/style-pop-ballad": "workspace:*",
         "@hum2music/testing": "workspace:*",
         "@hum2music/web": "workspace:*",
@@ -42,14 +48,17 @@
         "@hum2music/expression": "workspace:*",
         "@hum2music/harmony": "workspace:*",
         "@hum2music/instrument-bass": "workspace:*",
+        "@hum2music/instrument-cello": "workspace:*",
         "@hum2music/instrument-drums": "workspace:*",
         "@hum2music/instrument-guitar": "workspace:*",
         "@hum2music/instrument-piano": "workspace:*",
+        "@hum2music/instrument-viola": "workspace:*",
         "@hum2music/instrument-violin": "workspace:*",
         "@hum2music/midi": "workspace:*",
         "@hum2music/renderer-builtin-synth": "workspace:*",
         "@hum2music/rendering": "workspace:*",
         "@hum2music/sdk": "workspace:*",
+        "@hum2music/style-classical": "workspace:*",
         "@hum2music/style-pop-ballad": "workspace:*",
         "@hum2music/testing": "workspace:*",
         "@hum2music/web": "workspace:*",
@@ -64,14 +73,17 @@
         "@hum2music/expression": "workspace:*",
         "@hum2music/harmony": "workspace:*",
         "@hum2music/instrument-bass": "workspace:*",
+        "@hum2music/instrument-cello": "workspace:*",
         "@hum2music/instrument-drums": "workspace:*",
         "@hum2music/instrument-guitar": "workspace:*",
         "@hum2music/instrument-piano": "workspace:*",
+        "@hum2music/instrument-viola": "workspace:*",
         "@hum2music/instrument-violin": "workspace:*",
         "@hum2music/midi": "workspace:*",
         "@hum2music/renderer-builtin-synth": "workspace:*",
         "@hum2music/rendering": "workspace:*",
         "@hum2music/sdk": "workspace:*",
+        "@hum2music/style-classical": "workspace:*",
         "@hum2music/style-pop-ballad": "workspace:*",
       },
     },
@@ -96,8 +108,22 @@
       "name": "@hum2music/core",
       "version": "0.1.0",
     },
+    "packages/counterpoint": {
+      "name": "@hum2music/counterpoint",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hum2music/core": "workspace:*",
+      },
+    },
     "packages/expression": {
       "name": "@hum2music/expression",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hum2music/core": "workspace:*",
+      },
+    },
+    "packages/form": {
+      "name": "@hum2music/form",
       "version": "0.1.0",
       "dependencies": {
         "@hum2music/core": "workspace:*",
@@ -128,6 +154,13 @@
     "packages/music-theory": {
       "name": "@hum2music/music-theory",
       "version": "0.1.0",
+    },
+    "packages/orchestration": {
+      "name": "@hum2music/orchestration",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hum2music/plugin-api": "workspace:*",
+      },
     },
     "packages/plugin-api": {
       "name": "@hum2music/plugin-api",
@@ -175,6 +208,14 @@
         "@hum2music/plugin-api": "workspace:*",
       },
     },
+    "plugins/instruments/cello": {
+      "name": "@hum2music/instrument-cello",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hum2music/music-theory": "workspace:*",
+        "@hum2music/plugin-api": "workspace:*",
+      },
+    },
     "plugins/instruments/drums": {
       "name": "@hum2music/instrument-drums",
       "version": "0.1.0",
@@ -199,6 +240,14 @@
         "@hum2music/plugin-api": "workspace:*",
       },
     },
+    "plugins/instruments/viola": {
+      "name": "@hum2music/instrument-viola",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hum2music/music-theory": "workspace:*",
+        "@hum2music/plugin-api": "workspace:*",
+      },
+    },
     "plugins/instruments/violin": {
       "name": "@hum2music/instrument-violin",
       "version": "0.1.0",
@@ -217,6 +266,13 @@
         "@hum2music/rendering": "workspace:*",
       },
     },
+    "plugins/styles/classical": {
+      "name": "@hum2music/style-classical",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hum2music/plugin-api": "workspace:*",
+      },
+    },
     "plugins/styles/pop-ballad": {
       "name": "@hum2music/style-pop-ballad",
       "version": "0.1.0",
@@ -233,17 +289,25 @@
 
     "@hum2music/core": ["@hum2music/core@workspace:packages/core"],
 
+    "@hum2music/counterpoint": ["@hum2music/counterpoint@workspace:packages/counterpoint"],
+
     "@hum2music/expression": ["@hum2music/expression@workspace:packages/expression"],
+
+    "@hum2music/form": ["@hum2music/form@workspace:packages/form"],
 
     "@hum2music/harmony": ["@hum2music/harmony@workspace:packages/harmony"],
 
     "@hum2music/instrument-bass": ["@hum2music/instrument-bass@workspace:plugins/instruments/bass"],
+
+    "@hum2music/instrument-cello": ["@hum2music/instrument-cello@workspace:plugins/instruments/cello"],
 
     "@hum2music/instrument-drums": ["@hum2music/instrument-drums@workspace:plugins/instruments/drums"],
 
     "@hum2music/instrument-guitar": ["@hum2music/instrument-guitar@workspace:plugins/instruments/guitar"],
 
     "@hum2music/instrument-piano": ["@hum2music/instrument-piano@workspace:plugins/instruments/piano"],
+
+    "@hum2music/instrument-viola": ["@hum2music/instrument-viola@workspace:plugins/instruments/viola"],
 
     "@hum2music/instrument-violin": ["@hum2music/instrument-violin@workspace:plugins/instruments/violin"],
 
@@ -252,6 +316,8 @@
     "@hum2music/motif": ["@hum2music/motif@workspace:packages/motif"],
 
     "@hum2music/music-theory": ["@hum2music/music-theory@workspace:packages/music-theory"],
+
+    "@hum2music/orchestration": ["@hum2music/orchestration@workspace:packages/orchestration"],
 
     "@hum2music/plugin-api": ["@hum2music/plugin-api@workspace:packages/plugin-api"],
 
@@ -262,6 +328,8 @@
     "@hum2music/rendering": ["@hum2music/rendering@workspace:packages/rendering"],
 
     "@hum2music/sdk": ["@hum2music/sdk@workspace:packages/sdk"],
+
+    "@hum2music/style-classical": ["@hum2music/style-classical@workspace:plugins/styles/classical"],
 
     "@hum2music/style-pop-ballad": ["@hum2music/style-pop-ballad@workspace:plugins/styles/pop-ballad"],
 

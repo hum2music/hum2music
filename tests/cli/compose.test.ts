@@ -19,6 +19,15 @@ function readAscii(view: DataView, offset: number, length: number): string {
   return text;
 }
 
+/** Scans for a Program Change event (0xC2, channel 2 — the bass track's fixed MIDI channel) and returns its data byte. */
+function findProgramChangeValue(buffer: ArrayBuffer): number | undefined {
+  const bytes = new Uint8Array(buffer);
+  for (let i = 0; i < bytes.length - 1; i++) {
+    if (bytes[i] === 0xc2 && bytes[i + 1] <= 0x7f) return bytes[i + 1];
+  }
+  return undefined;
+}
+
 describe("hum2music compose (CLI, routed through the Plugin API)", () => {
   test("writes a 6-track SMF (tempo + melody/piano/bass/drums/guitar) by default", async () => {
     const dir = await mkdtemp(join(tmpdir(), "hum2music-cli-compose-"));
@@ -61,6 +70,38 @@ describe("hum2music compose (CLI, routed through the Plugin API)", () => {
     }
   }, 20000);
 
+  test("--style classical --instruments piano,violin,viola,cello composes a chamber ensemble", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "hum2music-cli-compose-"));
+    try {
+      const inputPath = await writeScaleFixture(dir);
+      const outputPath = join(dir, "song.mid");
+
+      const proc = Bun.spawn(
+        [
+          "bun",
+          CLI_ENTRY,
+          "compose",
+          inputPath,
+          "-o",
+          outputPath,
+          "--style",
+          "classical",
+          "--instruments",
+          "piano,violin,viola,cello",
+        ],
+        { stdout: "pipe", stderr: "pipe" },
+      );
+      expect(await proc.exited).toBe(0);
+
+      const bytes = new Uint8Array(await Bun.file(outputPath).arrayBuffer());
+      const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+      expect(readAscii(view, 0, 4)).toBe("MThd");
+      expect(view.getUint16(10, false)).toBe(6); // tempo + melody + piano + violin + viola + cello
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  }, 20000);
+
   test("--style ballad runs without error and produces a valid SMF", async () => {
     const dir = await mkdtemp(join(tmpdir(), "hum2music-cli-compose-"));
     try {
@@ -81,13 +122,40 @@ describe("hum2music compose (CLI, routed through the Plugin API)", () => {
     }
   }, 20000);
 
+  test("the bass track's GM program number changes between pop and ballad", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "hum2music-cli-compose-"));
+    try {
+      const inputPath = await writeScaleFixture(dir);
+      const popPath = join(dir, "pop.mid");
+      const balladPath = join(dir, "ballad.mid");
+
+      for (const [style, outputPath] of [
+        ["pop", popPath],
+        ["ballad", balladPath],
+      ] as const) {
+        const proc = Bun.spawn(
+          ["bun", CLI_ENTRY, "compose", inputPath, "-o", outputPath, "--instruments", "bass", "--style", style],
+          { stdout: "pipe", stderr: "pipe" },
+        );
+        expect(await proc.exited).toBe(0);
+      }
+
+      const popBytes = await Bun.file(popPath).arrayBuffer();
+      const balladBytes = await Bun.file(balladPath).arrayBuffer();
+      expect(findProgramChangeValue(popBytes)).toBe(33);
+      expect(findProgramChangeValue(balladBytes)).toBe(32);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  }, 20000);
+
   test("fails with a clear error for an unregistered style id", async () => {
     const dir = await mkdtemp(join(tmpdir(), "hum2music-cli-compose-"));
     try {
       const inputPath = await writeScaleFixture(dir);
       const outputPath = join(dir, "song.mid");
 
-      const proc = Bun.spawn(["bun", CLI_ENTRY, "compose", inputPath, "-o", outputPath, "--style", "classical"], {
+      const proc = Bun.spawn(["bun", CLI_ENTRY, "compose", inputPath, "-o", outputPath, "--style", "chiptune"], {
         stdout: "pipe",
         stderr: "pipe",
       });
@@ -126,17 +194,17 @@ describe("hum2music compose (CLI, routed through the Plugin API)", () => {
       const outputPath = join(dir, "song.mid");
 
       await Bun.write(
-        join(dir, "cello-plugin.ts"),
+        join(dir, "theremin-plugin.ts"),
         `import type { Hum2MusicPlugin } from "@hum2music/plugin-api";
 export const plugin: Hum2MusicPlugin = {
-  id: "@community/instrument-cello",
+  id: "@community/instrument-theremin",
   version: "0.1.0",
   apiVersion: "1.0.0",
   register(context) {
-    context.instruments.register({ id: "cello", name: "Cello", family: "strings", polyphony: 1 });
+    context.instruments.register({ id: "theremin", name: "Theremin", family: "electronic", polyphony: 1 });
     context.arrangers.register({
-      id: "@community/instrument-cello/arranger",
-      instrumentId: "cello",
+      id: "@community/instrument-theremin/arranger",
+      instrumentId: "theremin",
       async arrange(ctx) {
         return ctx.chords.map((chord) => ({ pitch: 48, startBeat: chord.startBeat, durationBeats: chord.durationBeats, velocity: 70 }));
       },
@@ -148,10 +216,10 @@ export default plugin;
       );
       await Bun.write(
         join(dir, "hum2music.config.ts"),
-        `export default { plugins: ["${join(dir, "cello-plugin.ts")}"] };\n`,
+        `export default { plugins: ["${join(dir, "theremin-plugin.ts")}"] };\n`,
       );
 
-      const proc = Bun.spawn(["bun", CLI_ENTRY, "compose", inputPath, "-o", outputPath, "--instruments", "cello"], {
+      const proc = Bun.spawn(["bun", CLI_ENTRY, "compose", inputPath, "-o", outputPath, "--instruments", "theremin"], {
         cwd: dir,
         stdout: "pipe",
         stderr: "pipe",
@@ -160,7 +228,7 @@ export default plugin;
 
       const bytes = new Uint8Array(await Bun.file(outputPath).arrayBuffer());
       const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-      expect(view.getUint16(10, false)).toBe(3); // tempo + melody + cello
+      expect(view.getUint16(10, false)).toBe(3); // tempo + melody + theremin
     } finally {
       await rm(dir, { recursive: true, force: true });
     }

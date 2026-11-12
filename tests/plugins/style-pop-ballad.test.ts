@@ -18,4 +18,12 @@ describe("popBalladStylePlugin", () => {
     expect(ballad!.orchestration?.pianoPattern).toBe("arpeggio");
     expect(ballad!.orchestration?.pianoAllowExtensions).toBe(true);
   });
+
+  test("carries the legacy per-style GM program numbers", () => {
+    const context = createTestContext();
+    popBalladStylePlugin.register(context);
+
+    expect(context.styles.get("pop")!.orchestration?.programNumbers).toEqual({ piano: 0, bass: 33, guitar: 29 });
+    expect(context.styles.get("ballad")!.orchestration?.programNumbers).toEqual({ piano: 0, bass: 32, guitar: 24 });
+  });
 });

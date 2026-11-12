@@ -4,13 +4,17 @@ import { parseArgs } from "node:util";
 import { decodeWav, encodeWavPcm16, reduceNoise, transcribeMelody } from "@hum2music/audio-analysis";
 import { analyzeHarmony, type TimedNote } from "@hum2music/harmony";
 import { bassInstrumentPlugin } from "@hum2music/instrument-bass";
+import { celloInstrumentPlugin } from "@hum2music/instrument-cello";
 import { drumsInstrumentPlugin } from "@hum2music/instrument-drums";
 import { guitarInstrumentPlugin } from "@hum2music/instrument-guitar";
 import { pianoInstrumentPlugin } from "@hum2music/instrument-piano";
+import { violaInstrumentPlugin } from "@hum2music/instrument-viola";
 import { violinInstrumentPlugin } from "@hum2music/instrument-violin";
 import { noteEventsToMidiNotes, writeMultiTrackMidiFile, type MidiTrack } from "@hum2music/midi";
+import type { StyleDefinition } from "@hum2music/plugin-api";
 import { builtinSynthRendererPlugin } from "@hum2music/renderer-builtin-synth";
 import { createHum2Music, type Hum2MusicConfig } from "@hum2music/sdk";
+import { classicalStylePlugin } from "@hum2music/style-classical";
 import { popBalladStylePlugin } from "@hum2music/style-pop-ballad";
 import { loadPluginModule } from "../plugin-loader";
 
@@ -19,7 +23,7 @@ const DEFAULT_INSTRUMENTS = ["piano", "bass", "drums", "guitar"];
 const DEFAULT_RENDERER = "builtin-synth";
 const CONFIG_FILENAME = "hum2music.config.ts";
 /** Static per-instrument MIDI channel assignment for the multi-track export; 9 is the GM percussion channel. */
-const CHANNELS: Record<string, number> = { piano: 1, bass: 2, drums: 9, guitar: 3, violin: 4 };
+const CHANNELS: Record<string, number> = { piano: 1, bass: 2, drums: 9, guitar: 3, violin: 4, viola: 5, cello: 6 };
 
 /**
  * Same transcribe -> harmony -> arrange -> export pipeline as `generate`,
@@ -47,7 +51,7 @@ export async function runCompose(args: string[]): Promise<void> {
   const outputPath = values.output;
   if (!inputPath || !outputPath) {
     console.error(
-      "Usage: hum2music compose <input.wav> -o <song.mid> [--wav <song.wav>] [--instruments piano,violin,bass,drums,guitar] [--style pop|ballad] [--seed <number>] [--bpm <number>]",
+      "Usage: hum2music compose <input.wav> -o <song.mid> [--wav <song.wav>] [--instruments piano,violin,viola,cello,bass,drums,guitar] [--style pop|ballad|classical] [--seed <number>] [--bpm <number>]",
     );
     process.exit(1);
   }
@@ -65,10 +69,13 @@ export async function runCompose(args: string[]): Promise<void> {
   const app = createHum2Music();
   await app.use(pianoInstrumentPlugin);
   await app.use(violinInstrumentPlugin);
+  await app.use(violaInstrumentPlugin);
+  await app.use(celloInstrumentPlugin);
   await app.use(bassInstrumentPlugin);
   await app.use(drumsInstrumentPlugin);
   await app.use(guitarInstrumentPlugin);
   await app.use(popBalladStylePlugin);
+  await app.use(classicalStylePlugin);
   await app.use(builtinSynthRendererPlugin);
 
   const config = await loadConfig();
@@ -118,6 +125,7 @@ export async function runCompose(args: string[]): Promise<void> {
   const midiTracks: MidiTrack[] = compositionWithMelody.tracks.map((track) => ({
     notes: noteEventsToMidiNotes(track.notes, harmony.selectedBpm),
     channel: CHANNELS[track.instrumentId] ?? 0,
+    programNumber: resolveProgramNumber(app, track.instrumentId, style),
   }));
   const midiBytes = writeMultiTrackMidiFile(midiTracks, { bpm: harmony.selectedBpm });
   await Bun.write(outputPath, midiBytes);
@@ -141,7 +149,16 @@ function parseInstruments(raw: string | undefined): string[] {
 }
 
 function listRegisteredStyles(app: ReturnType<typeof createHum2Music>): string {
-  return ["pop", "ballad"].filter((id) => app.getStyle(id)).join(", ") || "(none)";
+  return app.listStyles().map((style) => style.id).join(", ") || "(none)";
+}
+
+/** The active style's orchestration.programNumbers overrides the instrument's own static default, when both exist. */
+function resolveProgramNumber(
+  app: ReturnType<typeof createHum2Music>,
+  instrumentId: string,
+  style: StyleDefinition | undefined,
+): number | undefined {
+  return style?.orchestration?.programNumbers?.[instrumentId] ?? app.listInstruments().find((i) => i.id === instrumentId)?.midi?.program;
 }
 
 /** Loads ./hum2music.config.ts from the current working directory, if present (PRD UPDATE_PRD.md §11.1). */

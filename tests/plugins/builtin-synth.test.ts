@@ -41,12 +41,12 @@ describe("builtinSynthRenderer", () => {
     try {
       const audio = await builtinSynthRenderer.render(
         composition({
-          tracks: [{ instrumentId: "cello", notes: [{ pitch: 48, startBeat: 0, durationBeats: 1, velocity: 100 }] }],
+          tracks: [{ instrumentId: "harp", notes: [{ pitch: 48, startBeat: 0, durationBeats: 1, velocity: 100 }] }],
         }),
         {},
       );
       expect(Math.max(...Array.from(audio.samples[0]).map(Math.abs))).toBeGreaterThan(0);
-      expect(warnings.some((args) => String(args[0]).includes("cello"))).toBe(true);
+      expect(warnings.some((args) => String(args[0]).includes("harp"))).toBe(true);
     } finally {
       console.warn = originalWarn;
     }

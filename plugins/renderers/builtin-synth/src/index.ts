@@ -12,6 +12,8 @@ const INSTRUMENT_TIMBRES: Partial<Record<string, Timbre>> = {
   bass: "bass",
   guitar: "guitar",
   violin: "violin",
+  viola: "viola",
+  cello: "cello",
 };
 
 /**

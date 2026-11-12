@@ -8,7 +8,11 @@ function toStyleDefinition(name: "pop" | "ballad", displayName: string): StyleDe
     name: displayName,
     harmony: { progressionWeights: profile.harmonyWeights },
     rhythm: { drumDensity: profile.drumDensity, guitarPattern: profile.guitarPattern },
-    orchestration: { pianoPattern: profile.pianoPattern, pianoAllowExtensions: profile.pianoAllowExtensions },
+    orchestration: {
+      pianoPattern: profile.pianoPattern,
+      pianoAllowExtensions: profile.pianoAllowExtensions,
+      programNumbers: profile.programNumbers,
+    },
     expression: { humanizeMultiplier: profile.humanizeMultiplier },
     defaultInstruments: ["piano", "bass", "drums", "guitar"],
   };
