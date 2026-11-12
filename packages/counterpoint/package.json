@@ -1,0 +1,14 @@
+{
+  "name": "@hum2music/counterpoint",
+  "version": "0.1.0",
+  "description": "First-species (note-against-note) counterpoint: interval/motion classification and a rule-constrained second-voice generator, for Hum2Music's Classical Composition Engine.",
+  "license": "Apache-2.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "files": ["src"],
+  "dependencies": {
+    "@hum2music/core": "workspace:*"
+  }
+}
