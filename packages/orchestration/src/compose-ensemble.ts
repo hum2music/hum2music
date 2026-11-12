@@ -1,7 +1,7 @@
 import type { ChordEvent, NoteEvent } from "@hum2music/core";
 import { generateCounterpointVoice } from "@hum2music/counterpoint";
 import type { InstrumentDefinition } from "@hum2music/plugin-api";
-import { assignRoles, type OrchestrationAssignment } from "./assign";
+import { assignRoles, type OrchestrationAssignment } from "./assign.ts";
 
 export interface EnsembleTrack extends OrchestrationAssignment {
   notes: NoteEvent[];
