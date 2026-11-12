@@ -60,6 +60,16 @@ describe("renderToSamples", () => {
     expect(Array.from(piano)).not.toEqual(Array.from(guitar));
   });
 
+  test("violin timbre differs from the other sustained timbres", () => {
+    const note = { startMs: 0, durationMs: 300, velocity: 100, frequencyHz: 220 };
+    const melody = renderToSamples([{ ...note, timbre: "melody" }], [], {});
+    const bass = renderToSamples([{ ...note, timbre: "bass" }], [], {});
+    const violin = renderToSamples([{ ...note, timbre: "violin" }], [], {});
+
+    expect(Array.from(violin)).not.toEqual(Array.from(melody));
+    expect(Array.from(violin)).not.toEqual(Array.from(bass));
+  });
+
   test("defaults to the melody timbre when none is given", () => {
     const note = { startMs: 0, durationMs: 300, velocity: 100, frequencyHz: 220 };
     const withDefault = renderToSamples([note], [], {});
