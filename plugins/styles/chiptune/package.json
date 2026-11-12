@@ -1,0 +1,14 @@
+{
+  "name": "@hum2music/style-chiptune",
+  "version": "0.1.0",
+  "description": "Chiptune Style plugin: a mechanically precise, piano+bass+drums default tuned for retro game-music feel (PRD UPDATE_PRD.md §7.3).",
+  "license": "Apache-2.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "files": ["src"],
+  "dependencies": {
+    "@hum2music/plugin-api": "workspace:*"
+  }
+}

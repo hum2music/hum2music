@@ -10,6 +10,7 @@ import { violaInstrumentPlugin } from "@hum2music/instrument-viola";
 import { violinInstrumentPlugin } from "@hum2music/instrument-violin";
 import { builtinSynthRendererPlugin } from "@hum2music/renderer-builtin-synth";
 import { createHum2Music } from "@hum2music/sdk";
+import { chiptuneStylePlugin } from "@hum2music/style-chiptune";
 import { classicalStylePlugin } from "@hum2music/style-classical";
 import { popBalladStylePlugin } from "@hum2music/style-pop-ballad";
 import { validateInstrument } from "@hum2music/testing";
@@ -58,6 +59,7 @@ async function registerBuiltins(): Promise<ReturnType<typeof createHum2Music>> {
   await app.use(guitarInstrumentPlugin);
   await app.use(popBalladStylePlugin);
   await app.use(classicalStylePlugin);
+  await app.use(chiptuneStylePlugin);
   await app.use(builtinSynthRendererPlugin);
   return app;
 }

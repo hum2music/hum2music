@@ -9,6 +9,8 @@
   "types": "./src/index.ts",
   "files": ["src"],
   "dependencies": {
+    "@hum2music/core": "workspace:*",
+    "@hum2music/counterpoint": "workspace:*",
     "@hum2music/plugin-api": "workspace:*"
   }
 }

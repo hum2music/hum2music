@@ -23,6 +23,8 @@
     { "path": "../../plugins/instruments/guitar" },
     { "path": "../../plugins/styles/pop-ballad" },
     { "path": "../../plugins/styles/classical" },
+    { "path": "../../plugins/styles/chiptune" },
+    { "path": "../../packages/orchestration" },
     { "path": "../../plugins/renderers/builtin-synth" },
     { "path": "../../apps/web" }
   ]

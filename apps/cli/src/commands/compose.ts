@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { decodeWav, encodeWavPcm16, reduceNoise, transcribeMelody } from "@hum2music/audio-analysis";
-import { analyzeHarmony, type TimedNote } from "@hum2music/harmony";
+import { analyzeHarmony, type HarmonyAnalysis, type TimedNote } from "@hum2music/harmony";
 import { bassInstrumentPlugin } from "@hum2music/instrument-bass";
 import { celloInstrumentPlugin } from "@hum2music/instrument-cello";
 import { drumsInstrumentPlugin } from "@hum2music/instrument-drums";
@@ -11,9 +11,11 @@ import { pianoInstrumentPlugin } from "@hum2music/instrument-piano";
 import { violaInstrumentPlugin } from "@hum2music/instrument-viola";
 import { violinInstrumentPlugin } from "@hum2music/instrument-violin";
 import { noteEventsToMidiNotes, writeMultiTrackMidiFile, type MidiTrack } from "@hum2music/midi";
-import type { StyleDefinition } from "@hum2music/plugin-api";
+import { composeEnsemble } from "@hum2music/orchestration";
+import { COMPOSITION_SCHEMA_VERSION, type PluginComposition, type StyleDefinition } from "@hum2music/plugin-api";
 import { builtinSynthRendererPlugin } from "@hum2music/renderer-builtin-synth";
 import { createHum2Music, type Hum2MusicConfig } from "@hum2music/sdk";
+import { chiptuneStylePlugin } from "@hum2music/style-chiptune";
 import { classicalStylePlugin } from "@hum2music/style-classical";
 import { popBalladStylePlugin } from "@hum2music/style-pop-ballad";
 import { loadPluginModule } from "../plugin-loader";
@@ -43,6 +45,7 @@ export async function runCompose(args: string[]): Promise<void> {
       seed: { type: "string" },
       bpm: { type: "string" },
       style: { type: "string" },
+      orchestrate: { type: "boolean", default: false },
     },
     allowPositionals: true,
   });
@@ -51,7 +54,7 @@ export async function runCompose(args: string[]): Promise<void> {
   const outputPath = values.output;
   if (!inputPath || !outputPath) {
     console.error(
-      "Usage: hum2music compose <input.wav> -o <song.mid> [--wav <song.wav>] [--instruments piano,violin,viola,cello,bass,drums,guitar] [--style pop|ballad|classical] [--seed <number>] [--bpm <number>]",
+      "Usage: hum2music compose <input.wav> -o <song.mid> [--wav <song.wav>] [--instruments piano,violin,viola,cello,bass,drums,guitar] [--style pop|ballad|classical|chiptune] [--orchestrate] [--seed <number>] [--bpm <number>]",
     );
     process.exit(1);
   }
@@ -76,6 +79,7 @@ export async function runCompose(args: string[]): Promise<void> {
   await app.use(guitarInstrumentPlugin);
   await app.use(popBalladStylePlugin);
   await app.use(classicalStylePlugin);
+  await app.use(chiptuneStylePlugin);
   await app.use(builtinSynthRendererPlugin);
 
   const config = await loadConfig();
@@ -104,23 +108,27 @@ export async function runCompose(args: string[]): Promise<void> {
   const seed = values.seed !== undefined ? Number(values.seed) : DEFAULT_SEED;
   const instruments = parseInstruments(values.instruments);
 
-  const composition = await app.compose({
-    melody: harmony.melody,
-    chords: harmony.chords,
-    bpm: harmony.selectedBpm,
-    sections: harmony.songSections,
-    instruments,
-    style: styleId,
-    seed,
-  });
+  const composition = values.orchestrate
+    ? await composeWithOrchestration(app, instruments, harmony, styleId, seed)
+    : await app.compose({
+        melody: harmony.melody,
+        chords: harmony.chords,
+        bpm: harmony.selectedBpm,
+        sections: harmony.songSections,
+        instruments,
+        style: styleId,
+        seed,
+      });
 
-  // compose() only arranges the requested instruments; the raw melody
-  // itself is an input, not a plugin instrument, so it's added here as its
-  // own "melody" track to match what `generate` always includes.
-  const compositionWithMelody = {
-    ...composition,
-    tracks: [{ instrumentId: "melody", notes: harmony.melody }, ...composition.tracks],
-  };
+  // Outside --orchestrate, compose() only arranges the requested
+  // instruments; the raw melody itself is an input, not a plugin
+  // instrument, so it's added here as its own "melody" track to match what
+  // `generate` always includes. Under --orchestrate, one ensemble
+  // instrument already plays the melody role with these exact notes, so
+  // adding a separate "melody" track would duplicate it.
+  const compositionWithMelody = values.orchestrate
+    ? composition
+    : { ...composition, tracks: [{ instrumentId: "melody", notes: harmony.melody }, ...composition.tracks] };
 
   const midiTracks: MidiTrack[] = compositionWithMelody.tracks.map((track) => ({
     notes: noteEventsToMidiNotes(track.notes, harmony.selectedBpm),
@@ -138,6 +146,53 @@ export async function runCompose(args: string[]): Promise<void> {
   }
 
   await app.dispose();
+}
+
+/**
+ * `--orchestrate`: instead of arranging every requested instrument
+ * independently, decide roles via @hum2music/orchestration's assignRoles()
+ * and realize them - melody instrument plays the melody as-is,
+ * countermelody instruments get a real Counterpoint Engine voice, and
+ * harmony/bass instruments delegate to their own registered Arranger via
+ * a single-instrument app.compose() call each (reusing the existing path
+ * rather than reimplementing chordal arranging).
+ */
+async function composeWithOrchestration(
+  app: ReturnType<typeof createHum2Music>,
+  instrumentIds: string[],
+  harmony: HarmonyAnalysis,
+  styleId: string | undefined,
+  seed: number,
+): Promise<PluginComposition> {
+  const ensembleInstruments = instrumentIds.map((id) => {
+    const definition = app.listInstruments().find((candidate) => candidate.id === id);
+    if (!definition) throw new Error(`No InstrumentDefinition registered for instrument id "${id}".`);
+    return definition;
+  });
+
+  const ensembleTracks = await composeEnsemble(ensembleInstruments, {
+    melody: harmony.melody,
+    chords: harmony.chords,
+    arrangeChordal: async (instrumentId, chords) => {
+      const chordalComposition = await app.compose({
+        melody: harmony.melody,
+        chords,
+        bpm: harmony.selectedBpm,
+        sections: harmony.songSections,
+        instruments: [instrumentId],
+        style: styleId,
+        seed,
+      });
+      return chordalComposition.tracks[0]?.notes ?? [];
+    },
+  });
+
+  return {
+    metadata: { schemaVersion: COMPOSITION_SCHEMA_VERSION, seed, bpm: harmony.selectedBpm },
+    tracks: ensembleTracks.map(({ instrumentId, notes }) => ({ instrumentId, notes })),
+    chords: harmony.chords,
+    sections: harmony.songSections,
+  };
 }
 
 function parseInstruments(raw: string | undefined): string[] {

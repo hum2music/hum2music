@@ -35,6 +35,7 @@
     "@hum2music/instrument-guitar": "workspace:*",
     "@hum2music/style-pop-ballad": "workspace:*",
     "@hum2music/style-classical": "workspace:*",
+    "@hum2music/style-chiptune": "workspace:*",
     "@hum2music/renderer-builtin-synth": "workspace:*",
     "@hum2music/motif": "workspace:*",
     "@hum2music/counterpoint": "workspace:*",

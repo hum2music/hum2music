@@ -28,6 +28,7 @@
         "@hum2music/renderer-builtin-synth": "workspace:*",
         "@hum2music/rendering": "workspace:*",
         "@hum2music/sdk": "workspace:*",
+        "@hum2music/style-chiptune": "workspace:*",
         "@hum2music/style-classical": "workspace:*",
         "@hum2music/style-pop-ballad": "workspace:*",
         "@hum2music/testing": "workspace:*",
@@ -55,9 +56,11 @@
         "@hum2music/instrument-viola": "workspace:*",
         "@hum2music/instrument-violin": "workspace:*",
         "@hum2music/midi": "workspace:*",
+        "@hum2music/orchestration": "workspace:*",
         "@hum2music/renderer-builtin-synth": "workspace:*",
         "@hum2music/rendering": "workspace:*",
         "@hum2music/sdk": "workspace:*",
+        "@hum2music/style-chiptune": "workspace:*",
         "@hum2music/style-classical": "workspace:*",
         "@hum2music/style-pop-ballad": "workspace:*",
         "@hum2music/testing": "workspace:*",
@@ -83,6 +86,7 @@
         "@hum2music/renderer-builtin-synth": "workspace:*",
         "@hum2music/rendering": "workspace:*",
         "@hum2music/sdk": "workspace:*",
+        "@hum2music/style-chiptune": "workspace:*",
         "@hum2music/style-classical": "workspace:*",
         "@hum2music/style-pop-ballad": "workspace:*",
       },
@@ -159,6 +163,8 @@
       "name": "@hum2music/orchestration",
       "version": "0.1.0",
       "dependencies": {
+        "@hum2music/core": "workspace:*",
+        "@hum2music/counterpoint": "workspace:*",
         "@hum2music/plugin-api": "workspace:*",
       },
     },
@@ -266,6 +272,13 @@
         "@hum2music/rendering": "workspace:*",
       },
     },
+    "plugins/styles/chiptune": {
+      "name": "@hum2music/style-chiptune",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hum2music/plugin-api": "workspace:*",
+      },
+    },
     "plugins/styles/classical": {
       "name": "@hum2music/style-classical",
       "version": "0.1.0",
@@ -328,6 +341,8 @@
     "@hum2music/rendering": ["@hum2music/rendering@workspace:packages/rendering"],
 
     "@hum2music/sdk": ["@hum2music/sdk@workspace:packages/sdk"],
+
+    "@hum2music/style-chiptune": ["@hum2music/style-chiptune@workspace:plugins/styles/chiptune"],
 
     "@hum2music/style-classical": ["@hum2music/style-classical@workspace:plugins/styles/classical"],
 

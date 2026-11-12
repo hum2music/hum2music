@@ -20,10 +20,11 @@ function readAscii(view: DataView, offset: number, length: number): string {
 }
 
 /** Scans for a Program Change event (0xC2, channel 2 — the bass track's fixed MIDI channel) and returns its data byte. */
-function findProgramChangeValue(buffer: ArrayBuffer): number | undefined {
+/** Scans for a Program Change event on the given MIDI channel (0xC0 + channel) and returns its data byte. Defaults to channel 2 (bass, this file's original use case). */
+function findProgramChangeValue(buffer: ArrayBuffer, statusByte = 0xc2): number | undefined {
   const bytes = new Uint8Array(buffer);
   for (let i = 0; i < bytes.length - 1; i++) {
-    if (bytes[i] === 0xc2 && bytes[i + 1] <= 0x7f) return bytes[i + 1];
+    if (bytes[i] === statusByte && bytes[i + 1] <= 0x7f) return bytes[i + 1];
   }
   return undefined;
 }
@@ -102,6 +103,55 @@ describe("hum2music compose (CLI, routed through the Plugin API)", () => {
     }
   }, 20000);
 
+  test("--orchestrate routes the ensemble through assignRoles + the Counterpoint Engine", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "hum2music-cli-compose-"));
+    try {
+      const inputPath = await writeScaleFixture(dir);
+      const outputPath = join(dir, "song.mid");
+
+      const proc = Bun.spawn(
+        [
+          "bun",
+          CLI_ENTRY,
+          "compose",
+          inputPath,
+          "-o",
+          outputPath,
+          "--style",
+          "classical",
+          "--instruments",
+          "piano,violin,viola,cello",
+          "--orchestrate",
+        ],
+        { stdout: "pipe", stderr: "pipe" },
+      );
+      expect(await proc.exited).toBe(0);
+
+      const bytes = new Uint8Array(await Bun.file(outputPath).arrayBuffer());
+      const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+      expect(readAscii(view, 0, 4)).toBe("MThd");
+      expect(view.getUint16(10, false)).toBe(5); // tempo + piano + violin + viola + cello (no separate melody track: one instrument IS the melody)
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  }, 20000);
+
+  test("--orchestrate fails with a clear error for an unregistered instrument id", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "hum2music-cli-compose-"));
+    try {
+      const inputPath = await writeScaleFixture(dir);
+      const outputPath = join(dir, "song.mid");
+
+      const proc = Bun.spawn(
+        ["bun", CLI_ENTRY, "compose", inputPath, "-o", outputPath, "--instruments", "harp", "--orchestrate"],
+        { stdout: "pipe", stderr: "pipe" },
+      );
+      expect(await proc.exited).toBe(1);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  }, 20000);
+
   test("--style ballad runs without error and produces a valid SMF", async () => {
     const dir = await mkdtemp(join(tmpdir(), "hum2music-cli-compose-"));
     try {
@@ -149,13 +199,33 @@ describe("hum2music compose (CLI, routed through the Plugin API)", () => {
     }
   }, 20000);
 
+  test("--style chiptune uses the square-lead/synth-bass GM program numbers", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "hum2music-cli-compose-"));
+    try {
+      const inputPath = await writeScaleFixture(dir);
+      const outputPath = join(dir, "song.mid");
+
+      const proc = Bun.spawn(
+        ["bun", CLI_ENTRY, "compose", inputPath, "-o", outputPath, "--instruments", "piano,bass", "--style", "chiptune"],
+        { stdout: "pipe", stderr: "pipe" },
+      );
+      expect(await proc.exited).toBe(0);
+
+      const bytes = await Bun.file(outputPath).arrayBuffer();
+      expect(findProgramChangeValue(bytes, 0xc1)).toBe(80); // piano channel: Lead 1 (square)
+      expect(findProgramChangeValue(bytes, 0xc2)).toBe(38); // bass channel: Synth Bass 1
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  }, 20000);
+
   test("fails with a clear error for an unregistered style id", async () => {
     const dir = await mkdtemp(join(tmpdir(), "hum2music-cli-compose-"));
     try {
       const inputPath = await writeScaleFixture(dir);
       const outputPath = join(dir, "song.mid");
 
-      const proc = Bun.spawn(["bun", CLI_ENTRY, "compose", inputPath, "-o", outputPath, "--style", "chiptune"], {
+      const proc = Bun.spawn(["bun", CLI_ENTRY, "compose", inputPath, "-o", outputPath, "--style", "jazz"], {
         stdout: "pipe",
         stderr: "pipe",
       });
