@@ -1,0 +1,177 @@
+import { mkdir } from "node:fs/promises";
+import { join, resolve } from "node:path";
+import { parseArgs } from "node:util";
+import { bassInstrumentPlugin } from "@hum2music/instrument-bass";
+import { drumsInstrumentPlugin } from "@hum2music/instrument-drums";
+import { guitarInstrumentPlugin } from "@hum2music/instrument-guitar";
+import { pianoInstrumentPlugin } from "@hum2music/instrument-piano";
+import { violinInstrumentPlugin } from "@hum2music/instrument-violin";
+import { builtinSynthRendererPlugin } from "@hum2music/renderer-builtin-synth";
+import { createHum2Music } from "@hum2music/sdk";
+import { popBalladStylePlugin } from "@hum2music/style-pop-ballad";
+import { validateInstrument } from "@hum2music/testing";
+import { loadPluginModule } from "../plugin-loader";
+
+const USAGE = [
+  "Usage: hum2music plugin <subcommand>",
+  "  hum2music plugin list",
+  "  hum2music plugin validate <path-to-plugin-module>",
+  "  hum2music plugin create <name> [--dir <output-dir>]",
+  "  hum2music plugin test <path-to-plugin-dir>",
+].join("\n");
+
+/** PRD UPDATE_PRD.md §10.2's "プラグイン作成ツール" CLI commands. */
+export async function runPlugin(args: string[]): Promise<void> {
+  const [subcommand, ...rest] = args;
+
+  switch (subcommand) {
+    case "list":
+      await runList();
+      return;
+    case "validate":
+      await runValidate(rest);
+      return;
+    case "create":
+      await runCreate(rest);
+      return;
+    case "test":
+      await runTest(rest);
+      return;
+    default:
+      console.error(`Unknown "plugin" subcommand: ${subcommand ?? "(none)"}`);
+      console.error(USAGE);
+      process.exit(1);
+  }
+}
+
+async function registerBuiltins(): Promise<ReturnType<typeof createHum2Music>> {
+  const app = createHum2Music();
+  await app.use(pianoInstrumentPlugin);
+  await app.use(violinInstrumentPlugin);
+  await app.use(bassInstrumentPlugin);
+  await app.use(drumsInstrumentPlugin);
+  await app.use(guitarInstrumentPlugin);
+  await app.use(popBalladStylePlugin);
+  await app.use(builtinSynthRendererPlugin);
+  return app;
+}
+
+async function runList(): Promise<void> {
+  const app = await registerBuiltins();
+  for (const plugin of app.listPlugins()) {
+    console.log(`${plugin.id} (v${plugin.version}, apiVersion ${plugin.apiVersion})`);
+  }
+  await app.dispose();
+}
+
+async function runValidate(args: string[]): Promise<void> {
+  const modulePath = args[0];
+  if (!modulePath) {
+    console.error("Usage: hum2music plugin validate <path-to-plugin-module>");
+    process.exit(1);
+  }
+
+  const app = createHum2Music();
+  let candidate: Awaited<ReturnType<typeof loadPluginModule>>;
+  try {
+    candidate = await loadPluginModule(resolve(modulePath));
+    await app.use(candidate);
+  } catch (error) {
+    console.error((error as Error).message);
+    process.exit(1);
+  }
+
+  const instrumentErrors = app
+    .listInstruments()
+    .flatMap((instrument) => validateInstrument(instrument).map((message) => `  - ${instrument.id}: ${message}`));
+
+  if (instrumentErrors.length > 0) {
+    console.error(`Plugin "${candidate.id}" registered, but its instrument(s) failed validation:`);
+    console.error(instrumentErrors.join("\n"));
+    process.exit(1);
+  }
+
+  console.log(`Plugin "${candidate.id}" (v${candidate.version}, apiVersion ${candidate.apiVersion}) registered successfully.`);
+  console.log(`  Instruments: ${app.listInstruments().map((i) => i.id).join(", ") || "(none)"}`);
+  console.log(`  Styles: ${app.listStyles().map((s) => s.id).join(", ") || "(none)"}`);
+  console.log(`  Renderers: ${app.listRenderers().map((r) => r.id).join(", ") || "(none)"}`);
+  await app.dispose();
+}
+
+async function runCreate(args: string[]): Promise<void> {
+  const { values, positionals } = parseArgs({ args, options: { dir: { type: "string" } }, allowPositionals: true });
+  const name = positionals[0];
+  if (!name) {
+    console.error("Usage: hum2music plugin create <name> [--dir <output-dir>]");
+    process.exit(1);
+  }
+
+  const targetDir = resolve(values.dir ?? ".", name);
+  await mkdir(join(targetDir, "src"), { recursive: true });
+
+  await Bun.write(
+    join(targetDir, "package.json"),
+    `${JSON.stringify(
+      {
+        name,
+        version: "0.1.0",
+        private: true,
+        type: "module",
+        main: "./src/index.ts",
+        types: "./src/index.ts",
+        dependencies: { "@hum2music/plugin-api": "latest" },
+      },
+      null,
+      2,
+    )}\n`,
+  );
+
+  await Bun.write(
+    join(targetDir, "tsconfig.json"),
+    `${JSON.stringify(
+      {
+        compilerOptions: {
+          target: "ESNext",
+          module: "ESNext",
+          moduleResolution: "bundler",
+          strict: true,
+          types: ["@types/bun"],
+        },
+        include: ["src"],
+      },
+      null,
+      2,
+    )}\n`,
+  );
+
+  await Bun.write(
+    join(targetDir, "src/index.ts"),
+    `import type { Hum2MusicPlugin } from "@hum2music/plugin-api";
+
+export const plugin: Hum2MusicPlugin = {
+  id: "${name}",
+  version: "0.1.0",
+  apiVersion: "1.0.0",
+  register(context) {
+    // context.instruments.register({ id: "...", name: "...", family: "...", polyphony: 1 });
+    // context.arrangers.register({ id: "...", instrumentId: "...", async arrange(arrangementContext) { ... } });
+  },
+};
+
+export default plugin;
+`,
+  );
+
+  console.log(`Scaffolded a new plugin at ${targetDir}`);
+}
+
+async function runTest(args: string[]): Promise<void> {
+  const targetDir = args[0];
+  if (!targetDir) {
+    console.error("Usage: hum2music plugin test <path-to-plugin-dir>");
+    process.exit(1);
+  }
+
+  const proc = Bun.spawn(["bun", "test"], { cwd: resolve(targetDir), stdout: "inherit", stderr: "inherit" });
+  process.exit(await proc.exited);
+}

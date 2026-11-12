@@ -16,6 +16,7 @@
         "@hum2music/instrument-piano": "workspace:*",
         "@hum2music/instrument-violin": "workspace:*",
         "@hum2music/midi": "workspace:*",
+        "@hum2music/motif": "workspace:*",
         "@hum2music/music-theory": "workspace:*",
         "@hum2music/plugin-api": "workspace:*",
         "@hum2music/plugin-host": "workspace:*",
@@ -50,6 +51,7 @@
         "@hum2music/rendering": "workspace:*",
         "@hum2music/sdk": "workspace:*",
         "@hum2music/style-pop-ballad": "workspace:*",
+        "@hum2music/testing": "workspace:*",
         "@hum2music/web": "workspace:*",
       },
     },
@@ -61,8 +63,16 @@
         "@hum2music/audio-analysis": "workspace:*",
         "@hum2music/expression": "workspace:*",
         "@hum2music/harmony": "workspace:*",
+        "@hum2music/instrument-bass": "workspace:*",
+        "@hum2music/instrument-drums": "workspace:*",
+        "@hum2music/instrument-guitar": "workspace:*",
+        "@hum2music/instrument-piano": "workspace:*",
+        "@hum2music/instrument-violin": "workspace:*",
         "@hum2music/midi": "workspace:*",
+        "@hum2music/renderer-builtin-synth": "workspace:*",
         "@hum2music/rendering": "workspace:*",
+        "@hum2music/sdk": "workspace:*",
+        "@hum2music/style-pop-ballad": "workspace:*",
       },
     },
     "packages/arrangement": {
@@ -103,6 +113,13 @@
     },
     "packages/midi": {
       "name": "@hum2music/midi",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hum2music/core": "workspace:*",
+      },
+    },
+    "packages/motif": {
+      "name": "@hum2music/motif",
       "version": "0.1.0",
       "dependencies": {
         "@hum2music/core": "workspace:*",
@@ -231,6 +248,8 @@
     "@hum2music/instrument-violin": ["@hum2music/instrument-violin@workspace:plugins/instruments/violin"],
 
     "@hum2music/midi": ["@hum2music/midi@workspace:packages/midi"],
+
+    "@hum2music/motif": ["@hum2music/motif@workspace:packages/motif"],
 
     "@hum2music/music-theory": ["@hum2music/music-theory@workspace:packages/music-theory"],
 

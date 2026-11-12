@@ -77,11 +77,14 @@ function initUI() {
   const downloadMidiButton = document.getElementById("download-midi-button");
   const downloadWavButton = document.getElementById("download-wav-button");
   const downloadJsonButton = document.getElementById("download-json-button");
+  const pluginsListEl = document.getElementById("plugins-list");
 
   let lastAnalysis = null;
   let currentChords = [];
   let mediaRecorder = null;
   let recordedChunks = [];
+
+  loadPluginList();
 
   fileInput.addEventListener("change", async () => {
     const file = fileInput.files[0];
@@ -217,6 +220,34 @@ function initUI() {
       label.appendChild(input);
       chordEditorEl.appendChild(label);
     });
+  }
+
+  async function loadPluginList() {
+    try {
+      const response = await fetch("/api/plugins");
+      if (!response.ok) throw new Error(response.statusText);
+      renderPluginList(await response.json());
+    } catch {
+      pluginsListEl.textContent = "読み込みに失敗しました";
+    }
+  }
+
+  function renderPluginList({ instruments, styles, renderers }) {
+    const instrumentNames = instruments.map((i) => `${i.name} (${i.id})`).join(", ") || "(none)";
+    const styleNames = styles.map((s) => `${s.name} (${s.id})`).join(", ") || "(none)";
+    const rendererNames = renderers.join(", ") || "(none)";
+    pluginsListEl.innerHTML = "";
+    const list = document.createElement("ul");
+    for (const [label, value] of [
+      ["楽器", instrumentNames],
+      ["スタイル", styleNames],
+      ["レンダラー", rendererNames],
+    ]) {
+      const item = document.createElement("li");
+      item.textContent = `${label}: ${value}`;
+      list.appendChild(item);
+    }
+    pluginsListEl.appendChild(list);
   }
 
   function drawPitchCurve(pitchCurve, notes) {

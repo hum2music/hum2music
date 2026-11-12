@@ -2,6 +2,7 @@
 import { runAnalyze } from "./commands/analyze";
 import { runCompose } from "./commands/compose";
 import { runGenerate } from "./commands/generate";
+import { runPlugin } from "./commands/plugin";
 import { runServe } from "./commands/serve";
 import { runTranscribe } from "./commands/transcribe";
 
@@ -20,6 +21,9 @@ async function main() {
       return;
     case "compose":
       await runCompose(rest);
+      return;
+    case "plugin":
+      await runPlugin(rest);
       return;
     case "serve":
       await runServe(rest);

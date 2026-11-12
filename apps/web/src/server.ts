@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import { handleAnalyze } from "./api/analyze";
 import { handleExportMidi } from "./api/export-midi";
 import { handleExportWav } from "./api/export-wav";
+import { handlePlugins } from "./api/plugins";
 
 const PUBLIC_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "../public");
 
@@ -20,6 +21,9 @@ export function startServer(port: number): ReturnType<typeof Bun.serve> {
       }
       if (request.method === "POST" && url.pathname === "/api/export/wav") {
         return handleExportWav(request);
+      }
+      if (request.method === "GET" && url.pathname === "/api/plugins") {
+        return handlePlugins();
       }
 
       return serveStatic(url.pathname);

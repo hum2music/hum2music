@@ -223,3 +223,21 @@ describe("POST /api/export/wav", () => {
     expect(response.status).toBe(400);
   });
 });
+
+describe("GET /api/plugins", () => {
+  test("lists the registered instruments, styles, and renderers", async () => {
+    const response = await fetch(`${baseUrl}/api/plugins`);
+    expect(response.status).toBe(200);
+
+    const body = await response.json();
+    expect(body.instruments.map((i: { id: string }) => i.id).sort()).toEqual([
+      "bass",
+      "drums",
+      "guitar",
+      "piano",
+      "violin",
+    ]);
+    expect(body.styles.map((s: { id: string }) => s.id).sort()).toEqual(["ballad", "pop"]);
+    expect(body.renderers).toEqual(["builtin-synth"]);
+  });
+});

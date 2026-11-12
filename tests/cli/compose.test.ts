@@ -119,6 +119,53 @@ describe("hum2music compose (CLI, routed through the Plugin API)", () => {
     }
   }, 20000);
 
+  test("loads plugins from hum2music.config.ts in the current working directory", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "hum2music-cli-compose-"));
+    try {
+      const inputPath = await writeScaleFixture(dir);
+      const outputPath = join(dir, "song.mid");
+
+      await Bun.write(
+        join(dir, "cello-plugin.ts"),
+        `import type { Hum2MusicPlugin } from "@hum2music/plugin-api";
+export const plugin: Hum2MusicPlugin = {
+  id: "@community/instrument-cello",
+  version: "0.1.0",
+  apiVersion: "1.0.0",
+  register(context) {
+    context.instruments.register({ id: "cello", name: "Cello", family: "strings", polyphony: 1 });
+    context.arrangers.register({
+      id: "@community/instrument-cello/arranger",
+      instrumentId: "cello",
+      async arrange(ctx) {
+        return ctx.chords.map((chord) => ({ pitch: 48, startBeat: chord.startBeat, durationBeats: chord.durationBeats, velocity: 70 }));
+      },
+    });
+  },
+};
+export default plugin;
+`,
+      );
+      await Bun.write(
+        join(dir, "hum2music.config.ts"),
+        `export default { plugins: ["${join(dir, "cello-plugin.ts")}"] };\n`,
+      );
+
+      const proc = Bun.spawn(["bun", CLI_ENTRY, "compose", inputPath, "-o", outputPath, "--instruments", "cello"], {
+        cwd: dir,
+        stdout: "pipe",
+        stderr: "pipe",
+      });
+      expect(await proc.exited).toBe(0);
+
+      const bytes = new Uint8Array(await Bun.file(outputPath).arrayBuffer());
+      const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+      expect(view.getUint16(10, false)).toBe(3); // tempo + melody + cello
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  }, 20000);
+
   test("fails with a clear error when no pitch can be detected", async () => {
     const dir = await mkdtemp(join(tmpdir(), "hum2music-cli-compose-"));
     try {

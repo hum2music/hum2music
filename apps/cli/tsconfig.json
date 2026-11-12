@@ -13,6 +13,7 @@
     { "path": "../../packages/arrangement" },
     { "path": "../../packages/rendering" },
     { "path": "../../packages/sdk" },
+    { "path": "../../packages/testing" },
     { "path": "../../plugins/instruments/piano" },
     { "path": "../../plugins/instruments/violin" },
     { "path": "../../plugins/instruments/bass" },

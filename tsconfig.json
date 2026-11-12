@@ -9,6 +9,7 @@
     { "path": "./packages/expression" },
     { "path": "./packages/arrangement" },
     { "path": "./packages/rendering" },
+    { "path": "./packages/motif" },
     { "path": "./packages/plugin-api" },
     { "path": "./packages/plugin-host" },
     { "path": "./packages/sdk" },

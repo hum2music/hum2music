@@ -38,6 +38,7 @@
     "@hum2music/instrument-drums": "workspace:*",
     "@hum2music/instrument-guitar": "workspace:*",
     "@hum2music/style-pop-ballad": "workspace:*",
-    "@hum2music/renderer-builtin-synth": "workspace:*"
+    "@hum2music/renderer-builtin-synth": "workspace:*",
+    "@hum2music/testing": "workspace:*"
   }
 }

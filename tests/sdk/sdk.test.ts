@@ -77,6 +77,18 @@ describe("createHum2Music", () => {
     expect(app.getStyle("unknown")).toBeUndefined();
   });
 
+  test("listInstruments/listStyles/listRenderers reflect what's registered", async () => {
+    const app = createHum2Music();
+    await app.use(pianoInstrumentPlugin);
+    await app.use(violinInstrumentPlugin);
+    await app.use(popBalladStylePlugin);
+    await app.use(builtinSynthRendererPlugin);
+
+    expect(app.listInstruments().map((i) => i.id).sort()).toEqual(["piano", "violin"]);
+    expect(app.listStyles().map((s) => s.id).sort()).toEqual(["ballad", "pop"]);
+    expect(app.listRenderers().map((r) => r.id)).toEqual(["builtin-synth"]);
+  });
+
   test("throws a clear error for an unregistered style id", async () => {
     const app = createHum2Music();
     await app.use(pianoInstrumentPlugin);

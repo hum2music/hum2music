@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { decodeWav, encodeWavPcm16, reduceNoise, transcribeMelody } from "@hum2music/audio-analysis";
 import { analyzeHarmony, type TimedNote } from "@hum2music/harmony";
@@ -8,11 +10,14 @@ import { pianoInstrumentPlugin } from "@hum2music/instrument-piano";
 import { violinInstrumentPlugin } from "@hum2music/instrument-violin";
 import { noteEventsToMidiNotes, writeMultiTrackMidiFile, type MidiTrack } from "@hum2music/midi";
 import { builtinSynthRendererPlugin } from "@hum2music/renderer-builtin-synth";
-import { createHum2Music } from "@hum2music/sdk";
+import { createHum2Music, type Hum2MusicConfig } from "@hum2music/sdk";
 import { popBalladStylePlugin } from "@hum2music/style-pop-ballad";
+import { loadPluginModule } from "../plugin-loader";
 
 const DEFAULT_SEED = 42;
 const DEFAULT_INSTRUMENTS = ["piano", "bass", "drums", "guitar"];
+const DEFAULT_RENDERER = "builtin-synth";
+const CONFIG_FILENAME = "hum2music.config.ts";
 /** Static per-instrument MIDI channel assignment for the multi-track export; 9 is the GM percussion channel. */
 const CHANNELS: Record<string, number> = { piano: 1, bass: 2, drums: 9, guitar: 3, violin: 4 };
 
@@ -66,6 +71,12 @@ export async function runCompose(args: string[]): Promise<void> {
   await app.use(popBalladStylePlugin);
   await app.use(builtinSynthRendererPlugin);
 
+  const config = await loadConfig();
+  for (const specifier of config.plugins ?? []) {
+    const plugin = await loadPluginModule(specifier);
+    await app.use(plugin);
+  }
+
   const styleId = values.style;
   const style = styleId ? app.getStyle(styleId) : undefined;
   if (styleId && !style) {
@@ -113,7 +124,7 @@ export async function runCompose(args: string[]): Promise<void> {
   console.log(`Wrote ${midiTracks.length} track(s) to ${outputPath}`);
 
   if (values.wav) {
-    const audio = await app.render(compositionWithMelody, "builtin-synth", { seed });
+    const audio = await app.render(compositionWithMelody, config.defaultRenderer ?? DEFAULT_RENDERER, { seed });
     await Bun.write(values.wav, encodeWavPcm16(audio.samples[0], audio.sampleRate));
     console.log(`Wrote WAV preview to ${values.wav}`);
   }
@@ -131,4 +142,13 @@ function parseInstruments(raw: string | undefined): string[] {
 
 function listRegisteredStyles(app: ReturnType<typeof createHum2Music>): string {
   return ["pop", "ballad"].filter((id) => app.getStyle(id)).join(", ") || "(none)";
+}
+
+/** Loads ./hum2music.config.ts from the current working directory, if present (PRD UPDATE_PRD.md §11.1). */
+async function loadConfig(): Promise<Hum2MusicConfig> {
+  const configPath = resolve(process.cwd(), CONFIG_FILENAME);
+  if (!existsSync(configPath)) return {};
+
+  const imported = (await import(configPath)) as { default?: Hum2MusicConfig };
+  return imported.default ?? {};
 }
