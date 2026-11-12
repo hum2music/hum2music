@@ -3,11 +3,18 @@
   "version": "0.1.0",
   "description": "Sample Cello Instrument + Arranger plugin: a single-voice, closest-chord-tone bass voice within the cello's playable range.",
   "license": "Apache-2.0",
-  "private": true,
+  "homepage": "https://github.com/hum2music/hum2music/tree/main/plugins/instruments/cello#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hum2music/hum2music.git",
+    "directory": "plugins/instruments/cello"
+  },
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
-  "files": ["src"],
+  "files": [
+    "src"
+  ],
   "dependencies": {
     "@hum2music/music-theory": "workspace:*",
     "@hum2music/plugin-api": "workspace:*"

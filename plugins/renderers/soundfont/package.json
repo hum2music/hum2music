@@ -3,11 +3,18 @@
   "version": "0.1.0",
   "description": "SoundFont Renderer plugin: plays back real sample data from an in-memory .sf2 file, GM-mapped per instrument.",
   "license": "Apache-2.0",
-  "private": true,
+  "homepage": "https://github.com/hum2music/hum2music/tree/main/plugins/renderers/soundfont#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hum2music/hum2music.git",
+    "directory": "plugins/renderers/soundfont"
+  },
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
-  "files": ["src"],
+  "files": [
+    "src"
+  ],
   "dependencies": {
     "@hum2music/midi": "workspace:*",
     "@hum2music/plugin-api": "workspace:*",

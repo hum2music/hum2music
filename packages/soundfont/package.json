@@ -3,9 +3,16 @@
   "version": "0.1.0",
   "description": "SoundFont2 (.sf2) RIFF parsing and basic sample-based note playback, for Hum2Music's SoundFont Renderer.",
   "license": "Apache-2.0",
-  "private": true,
+  "homepage": "https://github.com/hum2music/hum2music/tree/main/packages/soundfont#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hum2music/hum2music.git",
+    "directory": "packages/soundfont"
+  },
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
-  "files": ["src"]
+  "files": [
+    "src"
+  ]
 }

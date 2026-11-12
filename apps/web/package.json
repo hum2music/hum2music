@@ -1,6 +1,6 @@
 {
   "name": "@hum2music/web",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Hum2Music's localhost UI server (Bun.serve API plus a static, build-free frontend).",
   "license": "Apache-2.0",
   "homepage": "https://github.com/hum2music/hum2music",

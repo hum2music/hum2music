@@ -44,7 +44,7 @@
     },
     "apps/cli": {
       "name": "hum2music",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "bin": {
         "hum2music": "./src/index.ts",
       },
@@ -78,7 +78,7 @@
     },
     "apps/web": {
       "name": "@hum2music/web",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
         "@hum2music/arrangement": "workspace:*",
         "@hum2music/audio-analysis": "workspace:*",
@@ -104,7 +104,7 @@
     },
     "packages/arrangement": {
       "name": "@hum2music/arrangement",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
         "@hum2music/core": "workspace:*",
         "@hum2music/expression": "workspace:*",
@@ -114,14 +114,14 @@
     },
     "packages/audio-analysis": {
       "name": "@hum2music/audio-analysis",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
         "@hum2music/core": "workspace:*",
       },
     },
     "packages/core": {
       "name": "@hum2music/core",
-      "version": "0.1.0",
+      "version": "0.2.0",
     },
     "packages/counterpoint": {
       "name": "@hum2music/counterpoint",
@@ -132,7 +132,7 @@
     },
     "packages/expression": {
       "name": "@hum2music/expression",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
         "@hum2music/core": "workspace:*",
       },
@@ -146,7 +146,7 @@
     },
     "packages/harmony": {
       "name": "@hum2music/harmony",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
         "@hum2music/core": "workspace:*",
         "@hum2music/music-theory": "workspace:*",
@@ -154,7 +154,7 @@
     },
     "packages/midi": {
       "name": "@hum2music/midi",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
         "@hum2music/core": "workspace:*",
       },
@@ -168,7 +168,7 @@
     },
     "packages/music-theory": {
       "name": "@hum2music/music-theory",
-      "version": "0.1.0",
+      "version": "0.2.0",
     },
     "packages/orchestration": {
       "name": "@hum2music/orchestration",
@@ -195,7 +195,7 @@
     },
     "packages/rendering": {
       "name": "@hum2music/rendering",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
         "@hum2music/expression": "workspace:*",
       },

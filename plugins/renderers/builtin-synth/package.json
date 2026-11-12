@@ -3,11 +3,18 @@
   "version": "0.1.0",
   "description": "Built-in Synth Renderer plugin: a compatibility wrapper around @hum2music/rendering's additive-synthesis engine.",
   "license": "Apache-2.0",
-  "private": true,
+  "homepage": "https://github.com/hum2music/hum2music/tree/main/plugins/renderers/builtin-synth#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hum2music/hum2music.git",
+    "directory": "plugins/renderers/builtin-synth"
+  },
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
-  "files": ["src"],
+  "files": [
+    "src"
+  ],
   "dependencies": {
     "@hum2music/audio-analysis": "workspace:*",
     "@hum2music/midi": "workspace:*",

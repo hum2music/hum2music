@@ -3,11 +3,18 @@
   "version": "0.1.0",
   "description": "Motif transformation primitives (transposition, inversion, retrograde, augmentation, diminution, sequence, fragmentation) for Hum2Music's Classical Composition Engine.",
   "license": "Apache-2.0",
-  "private": true,
+  "homepage": "https://github.com/hum2music/hum2music/tree/main/packages/motif#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hum2music/hum2music.git",
+    "directory": "packages/motif"
+  },
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
-  "files": ["src"],
+  "files": [
+    "src"
+  ],
   "dependencies": {
     "@hum2music/core": "workspace:*"
   }

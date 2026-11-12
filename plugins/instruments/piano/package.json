@@ -3,11 +3,18 @@
   "version": "0.1.0",
   "description": "Piano Instrument + Arranger plugin: a compatibility wrapper around @hum2music/arrangement's existing piano arranger.",
   "license": "Apache-2.0",
-  "private": true,
+  "homepage": "https://github.com/hum2music/hum2music/tree/main/plugins/instruments/piano#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hum2music/hum2music.git",
+    "directory": "plugins/instruments/piano"
+  },
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
-  "files": ["src"],
+  "files": [
+    "src"
+  ],
   "dependencies": {
     "@hum2music/arrangement": "workspace:*",
     "@hum2music/core": "workspace:*",

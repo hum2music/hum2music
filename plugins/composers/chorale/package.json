@@ -3,11 +3,18 @@
   "version": "0.1.0",
   "description": "Chorale Composer plugin: Theme and Variations from @hum2music/motif/form, plus a real first-species counterpoint voice from @hum2music/counterpoint.",
   "license": "Apache-2.0",
-  "private": true,
+  "homepage": "https://github.com/hum2music/hum2music/tree/main/plugins/composers/chorale#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hum2music/hum2music.git",
+    "directory": "plugins/composers/chorale"
+  },
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
-  "files": ["src"],
+  "files": [
+    "src"
+  ],
   "dependencies": {
     "@hum2music/core": "workspace:*",
     "@hum2music/counterpoint": "workspace:*",
