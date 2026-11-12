@@ -3,7 +3,8 @@
   "private": true,
   "workspaces": [
     "apps/*",
-    "packages/*"
+    "packages/*",
+    "plugins/*/*"
   ],
   "scripts": {
     "test": "bun test",
@@ -20,6 +21,13 @@
     "@hum2music/expression": "workspace:*",
     "@hum2music/web": "workspace:*",
     "@hum2music/arrangement": "workspace:*",
-    "@hum2music/rendering": "workspace:*"
+    "@hum2music/rendering": "workspace:*",
+    "@hum2music/plugin-api": "workspace:*",
+    "@hum2music/plugin-host": "workspace:*",
+    "@hum2music/sdk": "workspace:*",
+    "@hum2music/testing": "workspace:*",
+    "@hum2music/instrument-piano": "workspace:*",
+    "@hum2music/instrument-violin": "workspace:*",
+    "@hum2music/renderer-builtin-synth": "workspace:*"
   }
 }

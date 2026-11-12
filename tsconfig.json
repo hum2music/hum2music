@@ -9,6 +9,13 @@
     { "path": "./packages/expression" },
     { "path": "./packages/arrangement" },
     { "path": "./packages/rendering" },
+    { "path": "./packages/plugin-api" },
+    { "path": "./packages/plugin-host" },
+    { "path": "./packages/sdk" },
+    { "path": "./packages/testing" },
+    { "path": "./plugins/instruments/piano" },
+    { "path": "./plugins/instruments/violin" },
+    { "path": "./plugins/renderers/builtin-synth" },
     { "path": "./apps/web" },
     { "path": "./apps/cli" }
   ]

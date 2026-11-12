@@ -1,0 +1,15 @@
+{
+  "name": "@hum2music/testing",
+  "version": "0.1.0",
+  "description": "Test helpers for Hum2Music plugin authors: a disposable host context, instrument validation, and a determinism assertion.",
+  "license": "Apache-2.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "files": ["src"],
+  "dependencies": {
+    "@hum2music/plugin-api": "workspace:*",
+    "@hum2music/plugin-host": "workspace:*"
+  }
+}

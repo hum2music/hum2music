@@ -10,9 +10,16 @@
         "@hum2music/core": "workspace:*",
         "@hum2music/expression": "workspace:*",
         "@hum2music/harmony": "workspace:*",
+        "@hum2music/instrument-piano": "workspace:*",
+        "@hum2music/instrument-violin": "workspace:*",
         "@hum2music/midi": "workspace:*",
         "@hum2music/music-theory": "workspace:*",
+        "@hum2music/plugin-api": "workspace:*",
+        "@hum2music/plugin-host": "workspace:*",
+        "@hum2music/renderer-builtin-synth": "workspace:*",
         "@hum2music/rendering": "workspace:*",
+        "@hum2music/sdk": "workspace:*",
+        "@hum2music/testing": "workspace:*",
         "@hum2music/web": "workspace:*",
         "@types/bun": "latest",
         "typescript": "^5.7.0",
@@ -93,11 +100,68 @@
       "name": "@hum2music/music-theory",
       "version": "0.1.0",
     },
+    "packages/plugin-api": {
+      "name": "@hum2music/plugin-api",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hum2music/core": "workspace:*",
+      },
+    },
+    "packages/plugin-host": {
+      "name": "@hum2music/plugin-host",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hum2music/plugin-api": "workspace:*",
+      },
+    },
     "packages/rendering": {
       "name": "@hum2music/rendering",
       "version": "0.1.0",
       "dependencies": {
         "@hum2music/expression": "workspace:*",
+      },
+    },
+    "packages/sdk": {
+      "name": "@hum2music/sdk",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hum2music/core": "workspace:*",
+        "@hum2music/plugin-api": "workspace:*",
+        "@hum2music/plugin-host": "workspace:*",
+      },
+    },
+    "packages/testing": {
+      "name": "@hum2music/testing",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hum2music/plugin-api": "workspace:*",
+        "@hum2music/plugin-host": "workspace:*",
+      },
+    },
+    "plugins/instruments/piano": {
+      "name": "@hum2music/instrument-piano",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hum2music/arrangement": "workspace:*",
+        "@hum2music/plugin-api": "workspace:*",
+      },
+    },
+    "plugins/instruments/violin": {
+      "name": "@hum2music/instrument-violin",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hum2music/music-theory": "workspace:*",
+        "@hum2music/plugin-api": "workspace:*",
+      },
+    },
+    "plugins/renderers/builtin-synth": {
+      "name": "@hum2music/renderer-builtin-synth",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hum2music/audio-analysis": "workspace:*",
+        "@hum2music/midi": "workspace:*",
+        "@hum2music/plugin-api": "workspace:*",
+        "@hum2music/rendering": "workspace:*",
       },
     },
   },
@@ -112,11 +176,25 @@
 
     "@hum2music/harmony": ["@hum2music/harmony@workspace:packages/harmony"],
 
+    "@hum2music/instrument-piano": ["@hum2music/instrument-piano@workspace:plugins/instruments/piano"],
+
+    "@hum2music/instrument-violin": ["@hum2music/instrument-violin@workspace:plugins/instruments/violin"],
+
     "@hum2music/midi": ["@hum2music/midi@workspace:packages/midi"],
 
     "@hum2music/music-theory": ["@hum2music/music-theory@workspace:packages/music-theory"],
 
+    "@hum2music/plugin-api": ["@hum2music/plugin-api@workspace:packages/plugin-api"],
+
+    "@hum2music/plugin-host": ["@hum2music/plugin-host@workspace:packages/plugin-host"],
+
+    "@hum2music/renderer-builtin-synth": ["@hum2music/renderer-builtin-synth@workspace:plugins/renderers/builtin-synth"],
+
     "@hum2music/rendering": ["@hum2music/rendering@workspace:packages/rendering"],
+
+    "@hum2music/sdk": ["@hum2music/sdk@workspace:packages/sdk"],
+
+    "@hum2music/testing": ["@hum2music/testing@workspace:packages/testing"],
 
     "@hum2music/web": ["@hum2music/web@workspace:apps/web"],
 
