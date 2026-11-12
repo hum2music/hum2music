@@ -86,8 +86,15 @@ function initUI() {
   fileInput.addEventListener("change", async () => {
     const file = fileInput.files[0];
     if (!file) return;
-    const wavBlob = await decodeToWavBlob(await file.arrayBuffer());
-    await analyze(wavBlob);
+    recordStatus.textContent = "解析中...";
+    try {
+      const wavBlob = await decodeToWavBlob(await file.arrayBuffer());
+      const succeeded = await analyze(wavBlob);
+      recordStatus.textContent = succeeded ? "解析完了" : "解析に失敗しました";
+    } catch (error) {
+      recordStatus.textContent = "解析に失敗しました";
+      throw error;
+    }
   });
 
   recordButton.addEventListener("click", async () => {
