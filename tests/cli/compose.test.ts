@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { buildMinimalSf2 } from "../../fixtures/soundfont";
 import { C_MAJOR_SCALE_HZ, encodeWavPcm16, generateScale } from "../../fixtures/synth";
 
 const CLI_ENTRY = join(import.meta.dir, "../../apps/cli/src/index.ts");
@@ -419,6 +420,89 @@ describe("hum2music compose (CLI, routed through the Plugin API)", () => {
       const view = new DataView(wavBytes.buffer, wavBytes.byteOffset, wavBytes.byteLength);
       expect(readAscii(view, 0, 4)).toBe("RIFF");
       expect(readAscii(view, 8, 4)).toBe("WAVE");
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  }, 20000);
+
+  test("--renderer soundfont plays back a real .sf2 sample as stereo WAV", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "hum2music-cli-compose-"));
+    try {
+      const inputPath = await writeScaleFixture(dir);
+      const midiPath = join(dir, "song.mid");
+      const wavPath = join(dir, "song.wav");
+      const sf2Path = join(dir, "test.sf2");
+
+      const sampleLength = 44100; // 1s, looped
+      const sampleData = new Int16Array(sampleLength);
+      for (let i = 0; i < sampleLength; i++) {
+        sampleData[i] = Math.round(Math.sin((2 * Math.PI * 261.63 * i) / 44100) * 12000);
+      }
+      const sf2 = buildMinimalSf2({
+        sampleData,
+        sampleRate: 44100,
+        originalPitch: 60,
+        sampleModes: 1,
+        startLoop: 100,
+        endLoop: sampleLength - 100,
+        programNumber: 0,
+      });
+      await Bun.write(sf2Path, sf2);
+
+      const proc = Bun.spawn(
+        [
+          "bun",
+          CLI_ENTRY,
+          "compose",
+          inputPath,
+          "-o",
+          midiPath,
+          "--instruments",
+          "piano",
+          "--renderer",
+          "soundfont",
+          "--soundfont",
+          sf2Path,
+          "--wav",
+          wavPath,
+        ],
+        { stdout: "pipe", stderr: "pipe" },
+      );
+      const stderr = await new Response(proc.stderr).text();
+      expect(await proc.exited).toBe(0);
+      expect(stderr).not.toContain("No preset/instrument zone covers");
+
+      const wavBytes = new Uint8Array(await Bun.file(wavPath).arrayBuffer());
+      const view = new DataView(wavBytes.buffer, wavBytes.byteOffset, wavBytes.byteLength);
+      expect(readAscii(view, 0, 4)).toBe("RIFF");
+      expect(readAscii(view, 8, 4)).toBe("WAVE");
+      expect(view.getUint16(22, true)).toBe(2); // stereo
+
+      let peak = 0;
+      const dataSize = view.getUint32(40, true);
+      for (let offset = 44; offset < 44 + dataSize; offset += 2) {
+        peak = Math.max(peak, Math.abs(view.getInt16(offset, true)));
+      }
+      expect(peak).toBeGreaterThan(0);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  }, 20000);
+
+  test("--renderer soundfont without --soundfont fails with a clear error", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "hum2music-cli-compose-"));
+    try {
+      const inputPath = await writeScaleFixture(dir);
+      const midiPath = join(dir, "song.mid");
+      const wavPath = join(dir, "song.wav");
+
+      const proc = Bun.spawn(
+        ["bun", CLI_ENTRY, "compose", inputPath, "-o", midiPath, "--renderer", "soundfont", "--wav", wavPath],
+        { stdout: "pipe", stderr: "pipe" },
+      );
+      const stderr = await new Response(proc.stderr).text();
+      expect(await proc.exited).not.toBe(0);
+      expect(stderr).toContain("soundFontData");
     } finally {
       await rm(dir, { recursive: true, force: true });
     }

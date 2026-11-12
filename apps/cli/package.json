@@ -47,6 +47,7 @@
     "@hum2music/composer-motif-development": "workspace:*",
     "@hum2music/composer-chorale": "workspace:*",
     "@hum2music/renderer-builtin-synth": "workspace:*",
+    "@hum2music/renderer-soundfont": "workspace:*",
     "@hum2music/testing": "workspace:*"
   }
 }

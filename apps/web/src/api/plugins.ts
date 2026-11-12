@@ -6,6 +6,7 @@ import { pianoInstrumentPlugin } from "@hum2music/instrument-piano";
 import { violaInstrumentPlugin } from "@hum2music/instrument-viola";
 import { violinInstrumentPlugin } from "@hum2music/instrument-violin";
 import { builtinSynthRendererPlugin } from "@hum2music/renderer-builtin-synth";
+import { soundFontRendererPlugin } from "@hum2music/renderer-soundfont";
 import { createHum2Music } from "@hum2music/sdk";
 import { chiptuneStylePlugin } from "@hum2music/style-chiptune";
 import { pianoSoloStylePlugin } from "@hum2music/style-piano-solo";
@@ -31,6 +32,7 @@ export async function handlePlugins(): Promise<Response> {
   await app.use(chiptuneStylePlugin);
   await app.use(pianoSoloStylePlugin);
   await app.use(builtinSynthRendererPlugin);
+  await app.use(soundFontRendererPlugin);
 
   const body = {
     instruments: app.listInstruments(),

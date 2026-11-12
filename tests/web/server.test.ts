@@ -246,6 +246,6 @@ describe("GET /api/plugins", () => {
       "piano-solo",
       "pop",
     ]);
-    expect(body.renderers).toEqual(["builtin-synth"]);
+    expect(body.renderers).toEqual(["builtin-synth", "soundfont"]);
   });
 });

@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { parseArgs } from "node:util";
-import { decodeWav, encodeWavPcm16, reduceNoise, transcribeMelody } from "@hum2music/audio-analysis";
+import { decodeWav, encodeWavPcm16Multi, reduceNoise, transcribeMelody } from "@hum2music/audio-analysis";
 import { deriveSectionTempoCurve } from "@hum2music/expression";
 import { analyzeHarmony, type HarmonyAnalysis, type TimedNote } from "@hum2music/harmony";
 import { choraleComposerPlugin } from "@hum2music/composer-chorale";
@@ -17,6 +17,7 @@ import { noteEventsToMidiNotes, writeMultiTrackMidiFile, type MidiTrack } from "
 import { composeEnsemble } from "@hum2music/orchestration";
 import { COMPOSITION_SCHEMA_VERSION, type PluginComposition, type StyleDefinition } from "@hum2music/plugin-api";
 import { builtinSynthRendererPlugin } from "@hum2music/renderer-builtin-synth";
+import { soundFontRendererPlugin } from "@hum2music/renderer-soundfont";
 import { createHum2Music, type Hum2MusicConfig } from "@hum2music/sdk";
 import { chiptuneStylePlugin } from "@hum2music/style-chiptune";
 import { pianoSoloStylePlugin } from "@hum2music/style-piano-solo";
@@ -53,6 +54,8 @@ export async function runCompose(args: string[]): Promise<void> {
       orchestrate: { type: "boolean", default: false },
       composer: { type: "string" },
       humanize: { type: "string" },
+      renderer: { type: "string" },
+      soundfont: { type: "string" },
     },
     allowPositionals: true,
   });
@@ -61,7 +64,7 @@ export async function runCompose(args: string[]): Promise<void> {
   const outputPath = values.output;
   if (!inputPath || !outputPath) {
     console.error(
-      "Usage: hum2music compose <input.wav> -o <song.mid> [--wav <song.wav>] [--instruments piano,violin,viola,cello,bass,drums,guitar] [--style pop|ballad|classical|chiptune] [--orchestrate] [--composer motif-development|chorale] [--humanize <0-1>] [--seed <number>] [--bpm <number>]",
+      "Usage: hum2music compose <input.wav> -o <song.mid> [--wav <song.wav>] [--instruments piano,violin,viola,cello,bass,drums,guitar] [--style pop|ballad|classical|chiptune] [--orchestrate] [--composer motif-development|chorale] [--humanize <0-1>] [--renderer builtin-synth|soundfont] [--soundfont <file.sf2>] [--seed <number>] [--bpm <number>]",
     );
     process.exit(1);
   }
@@ -89,6 +92,7 @@ export async function runCompose(args: string[]): Promise<void> {
   await app.use(chiptuneStylePlugin);
   await app.use(pianoSoloStylePlugin);
   await app.use(builtinSynthRendererPlugin);
+  await app.use(soundFontRendererPlugin);
   await app.use(motifDevelopmentComposerPlugin);
   await app.use(choraleComposerPlugin);
 
@@ -117,8 +121,11 @@ export async function runCompose(args: string[]): Promise<void> {
 
   const seed = values.seed !== undefined ? Number(values.seed) : DEFAULT_SEED;
 
+  const rendererId = values.renderer ?? config.defaultRenderer ?? DEFAULT_RENDERER;
+  const soundFontData = values.soundfont ? await readFileAsArrayBuffer(values.soundfont) : undefined;
+
   if (values.composer) {
-    await runComposerOutput(app, values.composer, harmony, seed, outputPath, values.wav, config.defaultRenderer);
+    await runComposerOutput(app, values.composer, harmony, seed, outputPath, values.wav, rendererId, soundFontData);
     await app.dispose();
     return;
   }
@@ -160,8 +167,8 @@ export async function runCompose(args: string[]): Promise<void> {
   console.log(`Wrote ${midiTracks.length} track(s) to ${outputPath}`);
 
   if (values.wav) {
-    const audio = await app.render(compositionWithMelody, config.defaultRenderer ?? DEFAULT_RENDERER, { seed });
-    await writeFileData(values.wav, encodeWavPcm16(audio.samples[0], audio.sampleRate));
+    const audio = await app.render(compositionWithMelody, rendererId, { seed, soundFontData });
+    await writeFileData(values.wav, encodeWavPcm16Multi(audio.samples, audio.sampleRate));
     console.log(`Wrote WAV preview to ${values.wav}`);
   }
 
@@ -231,7 +238,8 @@ async function runComposerOutput(
   seed: number,
   outputPath: string,
   wavPath: string | undefined,
-  defaultRenderer: string | undefined,
+  rendererId: string,
+  soundFontData: ArrayBuffer | undefined,
 ): Promise<void> {
   const result = await app.composeWithComposer(composerId, {
     melody: harmony.melody,
@@ -253,8 +261,8 @@ async function runComposerOutput(
     chords: harmony.chords,
     sections: result.sections,
   };
-  const audio = await app.render(composition, defaultRenderer ?? DEFAULT_RENDERER, { seed });
-  await writeFileData(wavPath, encodeWavPcm16(audio.samples[0], audio.sampleRate));
+  const audio = await app.render(composition, rendererId, { seed, soundFontData });
+  await writeFileData(wavPath, encodeWavPcm16Multi(audio.samples, audio.sampleRate));
   console.log(`Wrote WAV preview to ${wavPath}`);
 }
 

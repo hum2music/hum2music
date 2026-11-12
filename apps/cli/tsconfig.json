@@ -29,6 +29,7 @@
     { "path": "../../plugins/composers/motif-development" },
     { "path": "../../plugins/composers/chorale" },
     { "path": "../../plugins/renderers/builtin-synth" },
+    { "path": "../../plugins/renderers/soundfont" },
     { "path": "../../apps/web" }
   ]
 }
