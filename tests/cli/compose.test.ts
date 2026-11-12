@@ -19,7 +19,6 @@ function readAscii(view: DataView, offset: number, length: number): string {
   return text;
 }
 
-/** Scans for a Program Change event (0xC2, channel 2 — the bass track's fixed MIDI channel) and returns its data byte. */
 /** Scans for a Program Change event on the given MIDI channel (0xC0 + channel) and returns its data byte. Defaults to channel 2 (bass, this file's original use case). */
 function findProgramChangeValue(buffer: ArrayBuffer, statusByte = 0xc2): number | undefined {
   const bytes = new Uint8Array(buffer);
@@ -146,6 +145,45 @@ describe("hum2music compose (CLI, routed through the Plugin API)", () => {
         ["bun", CLI_ENTRY, "compose", inputPath, "-o", outputPath, "--instruments", "harp", "--orchestrate"],
         { stdout: "pipe", stderr: "pipe" },
       );
+      expect(await proc.exited).toBe(1);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  }, 20000);
+
+  test("--composer motif-development bypasses the Arranger pipeline and produces a Theme+Variations SMF", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "hum2music-cli-compose-"));
+    try {
+      const inputPath = await writeScaleFixture(dir);
+      const outputPath = join(dir, "song.mid");
+
+      const proc = Bun.spawn(
+        ["bun", CLI_ENTRY, "compose", inputPath, "-o", outputPath, "--composer", "motif-development"],
+        { stdout: "pipe", stderr: "pipe" },
+      );
+      const stdout = await new Response(proc.stdout).text();
+      expect(await proc.exited).toBe(0);
+      expect(stdout).toContain("Theme -> Var. 1");
+
+      const bytes = new Uint8Array(await Bun.file(outputPath).arrayBuffer());
+      const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+      expect(readAscii(view, 0, 4)).toBe("MThd");
+      expect(view.getUint16(10, false)).toBe(2); // tempo + the composer's single output track
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  }, 20000);
+
+  test("--composer fails with a clear error for an unregistered composer id", async () => {
+    const dir = await mkdtemp(join(tmpdir(), "hum2music-cli-compose-"));
+    try {
+      const inputPath = await writeScaleFixture(dir);
+      const outputPath = join(dir, "song.mid");
+
+      const proc = Bun.spawn(["bun", CLI_ENTRY, "compose", inputPath, "-o", outputPath, "--composer", "unknown"], {
+        stdout: "pipe",
+        stderr: "pipe",
+      });
       expect(await proc.exited).toBe(1);
     } finally {
       await rm(dir, { recursive: true, force: true });

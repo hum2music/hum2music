@@ -1,0 +1,16 @@
+{
+  "name": "@hum2music/composer-motif-development",
+  "version": "0.1.0",
+  "description": "Motif Development Composer plugin: Theme and Variations built from @hum2music/motif's transformations and @hum2music/form's layout.",
+  "license": "Apache-2.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "files": ["src"],
+  "dependencies": {
+    "@hum2music/form": "workspace:*",
+    "@hum2music/motif": "workspace:*",
+    "@hum2music/plugin-api": "workspace:*"
+  }
+}

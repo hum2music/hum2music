@@ -22,6 +22,7 @@ describe("hum2music plugin list", () => {
     expect(stdout).toContain("@hum2music/instrument-violin");
     expect(stdout).toContain("@hum2music/style-pop-ballad");
     expect(stdout).toContain("@hum2music/renderer-builtin-synth");
+    expect(stdout).toContain("@hum2music/composer-motif-development");
   });
 });
 

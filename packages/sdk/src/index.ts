@@ -1,6 +1,8 @@
 import type {
   AudioBufferData,
   AudioRenderer,
+  ComposerContext,
+  ComposerResult,
   Hum2MusicPlugin,
   InstrumentDefinition,
   PluginComposition,
@@ -23,6 +25,8 @@ export interface Hum2MusicApp {
   listInstruments(): InstrumentDefinition[];
   listStyles(): StyleDefinition[];
   listRenderers(): AudioRenderer[];
+  /** Runs a registered Composer Plugin (e.g. motif development) directly, bypassing the per-instrument Arranger pipeline. */
+  composeWithComposer(composerId: string, context: ComposerContext): Promise<ComposerResult>;
   compose(options: ComposeOptions): Promise<PluginComposition>;
   render(composition: PluginComposition, rendererId: string, options?: RenderOptions): Promise<AudioBufferData>;
   dispose(): Promise<void>;
@@ -49,6 +53,11 @@ export function createHum2Music(): Hum2MusicApp {
     listInstruments: () => host.getContext().instruments.list(),
     listStyles: () => host.getContext().styles.list(),
     listRenderers: () => host.getContext().renderers.list(),
+    composeWithComposer: (composerId, context) => {
+      const composer = host.getContext().composers.get(composerId);
+      if (!composer) throw new Error(`No ComposerPlugin registered with id "${composerId}".`);
+      return composer.compose(context);
+    },
     compose: (options) => host.withRegistryLocked(() => compose(host.getContext(), options)),
     render: (composition, rendererId, options) => renderComposition(host.getContext(), composition, rendererId, options),
     dispose: () => host.dispose(),

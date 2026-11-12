@@ -25,6 +25,7 @@
     { "path": "../../plugins/styles/classical" },
     { "path": "../../plugins/styles/chiptune" },
     { "path": "../../packages/orchestration" },
+    { "path": "../../plugins/composers/motif-development" },
     { "path": "../../plugins/renderers/builtin-synth" },
     { "path": "../../apps/web" }
   ]

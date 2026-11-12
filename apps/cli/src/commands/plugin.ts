@@ -1,6 +1,7 @@
 import { mkdir } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { parseArgs } from "node:util";
+import { motifDevelopmentComposerPlugin } from "@hum2music/composer-motif-development";
 import { bassInstrumentPlugin } from "@hum2music/instrument-bass";
 import { celloInstrumentPlugin } from "@hum2music/instrument-cello";
 import { drumsInstrumentPlugin } from "@hum2music/instrument-drums";
@@ -61,6 +62,7 @@ async function registerBuiltins(): Promise<ReturnType<typeof createHum2Music>> {
   await app.use(classicalStylePlugin);
   await app.use(chiptuneStylePlugin);
   await app.use(builtinSynthRendererPlugin);
+  await app.use(motifDevelopmentComposerPlugin);
   return app;
 }
 

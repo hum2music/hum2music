@@ -1,7 +1,8 @@
 import { describe, expect, test } from "bun:test";
+import type { ChordEvent, NoteEvent } from "@hum2music/core";
+import { motifDevelopmentComposerPlugin } from "@hum2music/composer-motif-development";
 import { pianoInstrumentPlugin } from "@hum2music/instrument-piano";
 import { violinInstrumentPlugin } from "@hum2music/instrument-violin";
-import type { ChordEvent } from "@hum2music/core";
 import { builtinSynthRendererPlugin } from "@hum2music/renderer-builtin-synth";
 import { createHum2Music } from "@hum2music/sdk";
 import { popBalladStylePlugin } from "@hum2music/style-pop-ballad";
@@ -134,5 +135,28 @@ describe("createHum2Music", () => {
     const a = await run();
     const b = await run();
     expect(Array.from(b.samples[0])).toEqual(Array.from(a.samples[0]));
+  });
+
+  test("composeWithComposer runs a registered ComposerPlugin directly", async () => {
+    const app = createHum2Music();
+    await app.use(motifDevelopmentComposerPlugin);
+
+    const melody: NoteEvent[] = [60, 62, 64, 65, 67, 69, 71, 72].map((pitch, i) => ({
+      pitch,
+      startBeat: i,
+      durationBeats: 1,
+      velocity: 85,
+    }));
+    const result = await app.composeWithComposer("motif-development", { melody, chords: [], sections: [], seed: 1 });
+
+    expect(result.sections.map((s) => s.label)[0]).toBe("Theme");
+    expect(result.notes.length).toBeGreaterThan(0);
+  });
+
+  test("composeWithComposer throws a clear error for an unregistered composer id", async () => {
+    const app = createHum2Music();
+    expect(() => app.composeWithComposer("unknown", { melody: [], chords: [], sections: [], seed: 1 })).toThrow(
+      /No ComposerPlugin registered/,
+    );
   });
 });

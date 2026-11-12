@@ -13,6 +13,7 @@
     { "path": "./packages/counterpoint" },
     { "path": "./packages/form" },
     { "path": "./packages/orchestration" },
+    { "path": "./plugins/composers/motif-development" },
     { "path": "./packages/plugin-api" },
     { "path": "./packages/plugin-host" },
     { "path": "./packages/sdk" },

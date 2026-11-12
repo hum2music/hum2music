@@ -7,6 +7,7 @@
       "devDependencies": {
         "@hum2music/arrangement": "workspace:*",
         "@hum2music/audio-analysis": "workspace:*",
+        "@hum2music/composer-motif-development": "workspace:*",
         "@hum2music/core": "workspace:*",
         "@hum2music/counterpoint": "workspace:*",
         "@hum2music/expression": "workspace:*",
@@ -46,6 +47,7 @@
       "dependencies": {
         "@hum2music/arrangement": "workspace:*",
         "@hum2music/audio-analysis": "workspace:*",
+        "@hum2music/composer-motif-development": "workspace:*",
         "@hum2music/expression": "workspace:*",
         "@hum2music/harmony": "workspace:*",
         "@hum2music/instrument-bass": "workspace:*",
@@ -206,6 +208,15 @@
         "@hum2music/plugin-host": "workspace:*",
       },
     },
+    "plugins/composers/motif-development": {
+      "name": "@hum2music/composer-motif-development",
+      "version": "0.1.0",
+      "dependencies": {
+        "@hum2music/form": "workspace:*",
+        "@hum2music/motif": "workspace:*",
+        "@hum2music/plugin-api": "workspace:*",
+      },
+    },
     "plugins/instruments/bass": {
       "name": "@hum2music/instrument-bass",
       "version": "0.1.0",
@@ -299,6 +310,8 @@
     "@hum2music/arrangement": ["@hum2music/arrangement@workspace:packages/arrangement"],
 
     "@hum2music/audio-analysis": ["@hum2music/audio-analysis@workspace:packages/audio-analysis"],
+
+    "@hum2music/composer-motif-development": ["@hum2music/composer-motif-development@workspace:plugins/composers/motif-development"],
 
     "@hum2music/core": ["@hum2music/core@workspace:packages/core"],
 

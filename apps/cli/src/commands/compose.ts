@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { parseArgs } from "node:util";
 import { decodeWav, encodeWavPcm16, reduceNoise, transcribeMelody } from "@hum2music/audio-analysis";
 import { analyzeHarmony, type HarmonyAnalysis, type TimedNote } from "@hum2music/harmony";
+import { motifDevelopmentComposerPlugin } from "@hum2music/composer-motif-development";
 import { bassInstrumentPlugin } from "@hum2music/instrument-bass";
 import { celloInstrumentPlugin } from "@hum2music/instrument-cello";
 import { drumsInstrumentPlugin } from "@hum2music/instrument-drums";
@@ -46,6 +47,7 @@ export async function runCompose(args: string[]): Promise<void> {
       bpm: { type: "string" },
       style: { type: "string" },
       orchestrate: { type: "boolean", default: false },
+      composer: { type: "string" },
     },
     allowPositionals: true,
   });
@@ -54,7 +56,7 @@ export async function runCompose(args: string[]): Promise<void> {
   const outputPath = values.output;
   if (!inputPath || !outputPath) {
     console.error(
-      "Usage: hum2music compose <input.wav> -o <song.mid> [--wav <song.wav>] [--instruments piano,violin,viola,cello,bass,drums,guitar] [--style pop|ballad|classical|chiptune] [--orchestrate] [--seed <number>] [--bpm <number>]",
+      "Usage: hum2music compose <input.wav> -o <song.mid> [--wav <song.wav>] [--instruments piano,violin,viola,cello,bass,drums,guitar] [--style pop|ballad|classical|chiptune] [--orchestrate] [--composer motif-development] [--seed <number>] [--bpm <number>]",
     );
     process.exit(1);
   }
@@ -81,6 +83,7 @@ export async function runCompose(args: string[]): Promise<void> {
   await app.use(classicalStylePlugin);
   await app.use(chiptuneStylePlugin);
   await app.use(builtinSynthRendererPlugin);
+  await app.use(motifDevelopmentComposerPlugin);
 
   const config = await loadConfig();
   for (const specifier of config.plugins ?? []) {
@@ -106,6 +109,13 @@ export async function runCompose(args: string[]): Promise<void> {
   const harmony = analyzeHarmony(timedNotes, { overrideBpm, progressionWeights: style?.harmony?.progressionWeights });
 
   const seed = values.seed !== undefined ? Number(values.seed) : DEFAULT_SEED;
+
+  if (values.composer) {
+    await runComposerOutput(app, values.composer, harmony, seed, outputPath, values.wav, config.defaultRenderer);
+    await app.dispose();
+    return;
+  }
+
   const instruments = parseInstruments(values.instruments);
 
   const composition = values.orchestrate
@@ -193,6 +203,47 @@ async function composeWithOrchestration(
     chords: harmony.chords,
     sections: harmony.songSections,
   };
+}
+
+/**
+ * `--composer <id>`: bypasses the per-instrument Arranger pipeline
+ * entirely and runs a registered ComposerPlugin (e.g. "motif-development")
+ * directly on the transcribed melody, exporting its notes as a single
+ * track and printing the resulting song-section structure (e.g.
+ * "Theme -> Var. 1 (...) -> ...").
+ */
+async function runComposerOutput(
+  app: ReturnType<typeof createHum2Music>,
+  composerId: string,
+  harmony: HarmonyAnalysis,
+  seed: number,
+  outputPath: string,
+  wavPath: string | undefined,
+  defaultRenderer: string | undefined,
+): Promise<void> {
+  const result = await app.composeWithComposer(composerId, {
+    melody: harmony.melody,
+    chords: harmony.chords,
+    sections: harmony.songSections,
+    seed,
+  });
+
+  const midiTracks: MidiTrack[] = [{ notes: noteEventsToMidiNotes(result.notes, harmony.selectedBpm), channel: 0 }];
+  const midiBytes = writeMultiTrackMidiFile(midiTracks, { bpm: harmony.selectedBpm });
+  await Bun.write(outputPath, midiBytes);
+  console.log(`Wrote composer output (${result.sections.map((section) => section.label).join(" -> ")}) to ${outputPath}`);
+
+  if (!wavPath) return;
+
+  const composition: PluginComposition = {
+    metadata: { schemaVersion: COMPOSITION_SCHEMA_VERSION, seed, bpm: harmony.selectedBpm },
+    tracks: [{ instrumentId: "melody", notes: result.notes }],
+    chords: harmony.chords,
+    sections: result.sections,
+  };
+  const audio = await app.render(composition, defaultRenderer ?? DEFAULT_RENDERER, { seed });
+  await Bun.write(wavPath, encodeWavPcm16(audio.samples[0], audio.sampleRate));
+  console.log(`Wrote WAV preview to ${wavPath}`);
 }
 
 function parseInstruments(raw: string | undefined): string[] {

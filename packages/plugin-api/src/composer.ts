@@ -1,18 +1,29 @@
 import type { ChordEvent, NoteEvent, SongSection } from "@hum2music/core";
 
+export interface ComposerContext {
+  melody: NoteEvent[];
+  chords: ChordEvent[];
+  sections: SongSection[];
+  seed: number;
+}
+
+export interface ComposerResult {
+  notes: NoteEvent[];
+  sections: SongSection[];
+}
+
 /**
- * A Composer Plugin generates structure/notes beyond what a single
- * instrument's Arranger produces (e.g. motif development, counterpoint,
- * song form) — PRD UPDATE_PRD.md §8. Only the registration contract is
- * implemented in this slice; the Classical Composition Engine itself
- * (motif/counterpoint/form/orchestration) is future work (see
- * tasks/STATUS.md).
+ * A Composer Plugin generates a full composition (notes plus structure)
+ * from the input melody, beyond what a single instrument's Arranger
+ * produces (e.g. motif development, counterpoint, song form) — PRD
+ * UPDATE_PRD.md §8. The result shape matches @hum2music/form's
+ * FormResult, since a Composer is typically built on the Motif/
+ * Counterpoint/Form engines rather than reinventing note-sequence
+ * generation.
  */
 export interface ComposerPlugin {
   id: string;
-  compose(context: { melody: NoteEvent[]; chords: ChordEvent[]; sections: SongSection[]; seed: number }): Promise<{
-    sections: SongSection[];
-  }>;
+  compose(context: ComposerContext): Promise<ComposerResult>;
 }
 
 /**

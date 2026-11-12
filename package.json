@@ -40,6 +40,7 @@
     "@hum2music/motif": "workspace:*",
     "@hum2music/counterpoint": "workspace:*",
     "@hum2music/form": "workspace:*",
-    "@hum2music/orchestration": "workspace:*"
+    "@hum2music/orchestration": "workspace:*",
+    "@hum2music/composer-motif-development": "workspace:*"
   }
 }
