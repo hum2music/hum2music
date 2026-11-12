@@ -1,9 +1,9 @@
-import type { InstrumentArranger } from "./arranger";
-import type { ComposerPlugin, ExpressionPlugin } from "./composer";
-import type { InstrumentDefinition } from "./instrument";
-import type { Registry } from "./registry";
-import type { AudioRenderer } from "./renderer";
-import type { StyleDefinition } from "./style";
+import type { InstrumentArranger } from "./arranger.js";
+import type { ComposerPlugin, ExpressionPlugin } from "./composer.js";
+import type { InstrumentDefinition } from "./instrument.js";
+import type { Registry } from "./registry.js";
+import type { AudioRenderer } from "./renderer.js";
+import type { StyleDefinition } from "./style.js";
 
 /** The registries a plugin's register() populates (PRD UPDATE_PRD.md §4.2). */
 export interface PluginContext {

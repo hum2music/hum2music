@@ -1,6 +1,6 @@
 import type { ChordEvent, KeyCandidate, NoteEvent, SongSection } from "@hum2music/core";
-import type { InstrumentDefinition } from "./instrument";
-import type { StyleDefinition } from "./style";
+import type { InstrumentDefinition } from "./instrument.js";
+import type { StyleDefinition } from "./style.js";
 
 /**
  * Everything an Arranger Plugin can read while generating notes for its
