@@ -70,6 +70,17 @@ describe("renderToSamples", () => {
     expect(Array.from(violin)).not.toEqual(Array.from(bass));
   });
 
+  test("viola and cello each differ from each other and from the violin", () => {
+    const note = { startMs: 0, durationMs: 300, velocity: 100, frequencyHz: 220 };
+    const violin = renderToSamples([{ ...note, timbre: "violin" }], [], {});
+    const viola = renderToSamples([{ ...note, timbre: "viola" }], [], {});
+    const cello = renderToSamples([{ ...note, timbre: "cello" }], [], {});
+
+    expect(Array.from(viola)).not.toEqual(Array.from(violin));
+    expect(Array.from(cello)).not.toEqual(Array.from(violin));
+    expect(Array.from(cello)).not.toEqual(Array.from(viola));
+  });
+
   test("defaults to the melody timbre when none is given", () => {
     const note = { startMs: 0, durationMs: 300, velocity: 100, frequencyHz: 220 };
     const withDefault = renderToSamples([note], [], {});
