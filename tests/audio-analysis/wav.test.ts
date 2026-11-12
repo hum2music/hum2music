@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { decodeWav } from "@hum2music/audio-analysis";
+import { decodeWav, encodeWavPcm16Multi } from "@hum2music/audio-analysis";
 import { encodeWavPcm16, generateTone } from "../../fixtures/synth";
 
 describe("decodeWav", () => {
@@ -35,6 +35,27 @@ describe("decodeWav", () => {
     const view = new DataView(buffer);
     view.setUint16(20, 3, true); // IEEE float marker
     expect(() => decodeWav(buffer)).toThrow();
+  });
+});
+
+describe("encodeWavPcm16Multi", () => {
+  test("single-channel output is byte-identical to encodeWavPcm16", () => {
+    const samples = generateTone(440, 0.01, 44100);
+    expect(encodeWavPcm16Multi([samples], 44100)).toEqual(encodeWavPcm16(samples, 44100));
+  });
+
+  test("interleaves two channels and round-trips via decodeWav (downmixed)", () => {
+    const left = new Float32Array([1, -1, 0.5]);
+    const right = new Float32Array([-1, 1, 0.5]);
+    const buffer = encodeWavPcm16Multi([left, right], 44100);
+
+    const view = new DataView(buffer);
+    expect(view.getUint16(22, true)).toBe(2); // numChannels in the fmt chunk
+
+    const { samples } = decodeWav(buffer);
+    expect(samples.length).toBe(3);
+    expect(samples[0]).toBeCloseTo(0, 2);
+    expect(samples[2]).toBeCloseTo(0.5, 2);
   });
 });
 

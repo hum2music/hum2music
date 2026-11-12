@@ -12,6 +12,7 @@
     { "path": "./packages/motif" },
     { "path": "./packages/counterpoint" },
     { "path": "./packages/form" },
+    { "path": "./packages/soundfont" },
     { "path": "./packages/orchestration" },
     { "path": "./plugins/composers/motif-development" },
     { "path": "./plugins/composers/chorale" },
@@ -31,6 +32,7 @@
     { "path": "./plugins/styles/chiptune" },
     { "path": "./plugins/styles/piano-solo" },
     { "path": "./plugins/renderers/builtin-synth" },
+    { "path": "./plugins/renderers/soundfont" },
     { "path": "./apps/web" },
     { "path": "./apps/cli" }
   ]

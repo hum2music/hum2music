@@ -15,9 +15,11 @@ export interface AudioBufferData {
 export interface RenderOptions {
   sampleRate?: number;
   seed?: number;
-  /** Instrument ID -> renderer-specific preset/patch name. */
+  /** Instrument ID -> renderer-specific preset/patch name (e.g. @hum2music/renderer-soundfont reads this as a GM program number string). */
   instrumentPresets?: Record<string, string>;
   channels?: number;
+  /** An in-memory SoundFont2 (.sf2) file, for renderers that play back real sample data instead of synthesizing (e.g. @hum2music/renderer-soundfont). Ignored by renderers that don't need it. */
+  soundFontData?: ArrayBuffer;
 }
 
 /** Separates the instrument's playable definition from how it's actually synthesized (PRD UPDATE_PRD.md §6, ADR-002). */
