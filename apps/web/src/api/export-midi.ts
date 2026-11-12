@@ -1,5 +1,5 @@
 import { writeMultiTrackMidiFile } from "@hum2music/midi";
-import { jsonError, resolveComposition, type ExportRequestBody } from "./shared";
+import { jsonError, resolveComposition, type ExportRequestBody } from "./shared.ts";
 
 export async function handleExportMidi(request: Request): Promise<Response> {
   let body: ExportRequestBody;

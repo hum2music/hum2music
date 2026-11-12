@@ -23,6 +23,7 @@
     { "path": "../../plugins/styles/pop-ballad" },
     { "path": "../../plugins/styles/classical" },
     { "path": "../../plugins/styles/chiptune" },
+    { "path": "../../plugins/styles/piano-solo" },
     { "path": "../../plugins/renderers/builtin-synth" }
   ]
 }

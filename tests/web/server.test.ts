@@ -239,7 +239,13 @@ describe("GET /api/plugins", () => {
       "viola",
       "violin",
     ]);
-    expect(body.styles.map((s: { id: string }) => s.id).sort()).toEqual(["ballad", "chiptune", "classical", "pop"]);
+    expect(body.styles.map((s: { id: string }) => s.id).sort()).toEqual([
+      "ballad",
+      "chiptune",
+      "classical",
+      "piano-solo",
+      "pop",
+    ]);
     expect(body.renderers).toEqual(["builtin-synth"]);
   });
 });

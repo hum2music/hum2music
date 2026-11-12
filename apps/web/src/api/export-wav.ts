@@ -6,7 +6,7 @@ import {
   type PitchedRenderNote,
   type Timbre,
 } from "@hum2music/rendering";
-import { jsonError, resolveComposition, type ExportRequestBody } from "./shared";
+import { jsonError, resolveComposition, type ExportRequestBody } from "./shared.ts";
 
 export async function handleExportWav(request: Request): Promise<Response> {
   let body: ExportRequestBody;
