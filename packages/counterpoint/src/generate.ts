@@ -1,5 +1,5 @@
 import type { NoteEvent } from "@hum2music/core";
-import { classifyMotion, crossesVoices, hasForbiddenParallelPerfect, isConsonant, isPerfectConsonance } from "./intervals.js";
+import { classifyMotion, crossesVoices, hasForbiddenParallelPerfect, isConsonant, isPerfectConsonance } from "./intervals.ts";
 
 export interface CounterpointOptions {
   range: { min: number; max: number };

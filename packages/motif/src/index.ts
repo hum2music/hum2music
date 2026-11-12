@@ -1,2 +1,2 @@
-export * from "./extract.js";
-export * from "./transform.js";
+export * from "./extract.ts";
+export * from "./transform.ts";

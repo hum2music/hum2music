@@ -1,5 +1,5 @@
 import type { Hum2MusicPlugin } from "@hum2music/plugin-api";
-import { celloArranger } from "./arranger.js";
+import { celloArranger } from "./arranger.ts";
 
 const CELLO_MIDI_PROGRAM = 42; // GM Cello
 const CELLO_MIN_PITCH = 36; // C2
@@ -23,4 +23,4 @@ export const celloInstrumentPlugin: Hum2MusicPlugin = {
   },
 };
 
-export { celloArranger } from "./arranger.js";
+export { celloArranger } from "./arranger.ts";

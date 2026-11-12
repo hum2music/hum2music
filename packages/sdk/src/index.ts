@@ -8,11 +8,11 @@ import type {
   StyleDefinition,
 } from "@hum2music/plugin-api";
 import { PluginHost, type PluginRecord } from "@hum2music/plugin-host";
-import { compose, type ComposeOptions } from "./compose.js";
-import { renderComposition } from "./render.js";
+import { compose, type ComposeOptions } from "./compose.ts";
+import { renderComposition } from "./render.ts";
 
-export type { ComposeOptions } from "./compose.js";
-export { defineConfig, type Hum2MusicConfig } from "./config.js";
+export type { ComposeOptions } from "./compose.ts";
+export { defineConfig, type Hum2MusicConfig } from "./config.ts";
 
 export interface Hum2MusicApp {
   use(plugin: Hum2MusicPlugin): Promise<void>;

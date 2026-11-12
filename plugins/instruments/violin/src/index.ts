@@ -1,5 +1,5 @@
 import type { Hum2MusicPlugin } from "@hum2music/plugin-api";
-import { violinArranger } from "./arranger.js";
+import { violinArranger } from "./arranger.ts";
 
 const VIOLIN_MIDI_PROGRAM = 40; // GM Violin
 const VIOLIN_MIN_PITCH = 55; // G3
@@ -29,4 +29,4 @@ export const violinInstrumentPlugin: Hum2MusicPlugin = {
   },
 };
 
-export { violinArranger } from "./arranger.js";
+export { violinArranger } from "./arranger.ts";

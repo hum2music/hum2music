@@ -1,4 +1,4 @@
-import type { PluginComposition } from "./composition.js";
+import type { PluginComposition } from "./composition.ts";
 
 /**
  * Runtime-independent audio buffer: plain sample arrays rather than a

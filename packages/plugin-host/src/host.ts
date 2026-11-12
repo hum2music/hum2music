@@ -8,8 +8,8 @@ import type {
   PluginContext,
   StyleDefinition,
 } from "@hum2music/plugin-api";
-import { RegistryImpl } from "./registry.js";
-import { isApiVersionCompatible } from "./semver.js";
+import { RegistryImpl } from "./registry.ts";
+import { isApiVersionCompatible } from "./semver.ts";
 
 /** The Plugin API version this host implements. Bump the major segment on breaking changes (PRD UPDATE_PRD.md §13.4). */
 export const HOST_API_VERSION = "1.0.0";

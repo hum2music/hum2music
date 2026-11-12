@@ -1,5 +1,5 @@
 import type { Hum2MusicPlugin } from "@hum2music/plugin-api";
-import { violaArranger } from "./arranger.js";
+import { violaArranger } from "./arranger.ts";
 
 const VIOLA_MIDI_PROGRAM = 41; // GM Viola
 const VIOLA_MIN_PITCH = 48; // C3
@@ -23,4 +23,4 @@ export const violaInstrumentPlugin: Hum2MusicPlugin = {
   },
 };
 
-export { violaArranger } from "./arranger.js";
+export { violaArranger } from "./arranger.ts";

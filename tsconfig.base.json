@@ -6,6 +6,8 @@
     "lib": ["ESNext"],
     "strict": true,
     "declaration": true,
+    "emitDeclarationOnly": true,
+    "allowImportingTsExtensions": true,
     "composite": true,
     "esModuleInterop": true,
     "skipLibCheck": true,

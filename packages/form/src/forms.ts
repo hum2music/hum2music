@@ -1,5 +1,5 @@
 import type { NoteEvent } from "@hum2music/core";
-import { layoutSegments, type FormResult } from "./layout.js";
+import { layoutSegments, type FormResult } from "./layout.ts";
 
 /** A B — PRD UPDATE_PRD.md §8.4's Binary Form. */
 export function binaryForm(theme: NoteEvent[], contrastingMaterial: NoteEvent[]): FormResult {

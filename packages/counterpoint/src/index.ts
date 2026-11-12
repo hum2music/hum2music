@@ -1,2 +1,2 @@
-export * from "./intervals.js";
-export * from "./generate.js";
+export * from "./intervals.ts";
+export * from "./generate.ts";
