@@ -104,7 +104,7 @@
     },
     "packages/arrangement": {
       "name": "@hum2music/arrangement",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "dependencies": {
         "@hum2music/core": "^0.2.0",
         "@hum2music/expression": "^0.2.0",
@@ -114,7 +114,7 @@
     },
     "packages/audio-analysis": {
       "name": "@hum2music/audio-analysis",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "dependencies": {
         "@hum2music/core": "^0.2.0",
       },
@@ -146,7 +146,7 @@
     },
     "packages/harmony": {
       "name": "@hum2music/harmony",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "dependencies": {
         "@hum2music/core": "^0.2.0",
         "@hum2music/music-theory": "^0.2.0",
