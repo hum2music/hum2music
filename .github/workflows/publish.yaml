@@ -1,0 +1,38 @@
+name: Publish packages to npm
+
+# Every package in this workspace that isn't one of the 8 split-off
+# packages/* repos (core, music-theory, audio-analysis, expression, midi,
+# harmony, rendering, arrangement - each publishes itself via its own repo's
+# .github/workflows/publish.yaml). Packages already at their current version
+# on the registry are skipped; see .github/scripts/publish-workspace-packages.sh.
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  id-token: write # required for npm's OIDC trusted publishing
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - uses: oven-sh/setup-bun@v2
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+
+      - run: bun install
+
+      - run: bun run typecheck
+
+      - run: bun test
+
+      - run: bash .github/scripts/publish-workspace-packages.sh
