@@ -106,17 +106,17 @@
       "name": "@hum2music/arrangement",
       "version": "0.2.0",
       "dependencies": {
-        "@hum2music/core": "workspace:*",
-        "@hum2music/expression": "workspace:*",
-        "@hum2music/harmony": "workspace:*",
-        "@hum2music/music-theory": "workspace:*",
+        "@hum2music/core": "^0.2.0",
+        "@hum2music/expression": "^0.2.0",
+        "@hum2music/harmony": "^0.2.0",
+        "@hum2music/music-theory": "^0.2.0",
       },
     },
     "packages/audio-analysis": {
       "name": "@hum2music/audio-analysis",
       "version": "0.2.0",
       "dependencies": {
-        "@hum2music/core": "workspace:*",
+        "@hum2music/core": "^0.2.0",
       },
     },
     "packages/core": {
@@ -134,7 +134,7 @@
       "name": "@hum2music/expression",
       "version": "0.2.0",
       "dependencies": {
-        "@hum2music/core": "workspace:*",
+        "@hum2music/core": "^0.2.0",
       },
     },
     "packages/form": {
@@ -148,15 +148,15 @@
       "name": "@hum2music/harmony",
       "version": "0.2.0",
       "dependencies": {
-        "@hum2music/core": "workspace:*",
-        "@hum2music/music-theory": "workspace:*",
+        "@hum2music/core": "^0.2.0",
+        "@hum2music/music-theory": "^0.2.0",
       },
     },
     "packages/midi": {
       "name": "@hum2music/midi",
       "version": "0.2.0",
       "dependencies": {
-        "@hum2music/core": "workspace:*",
+        "@hum2music/core": "^0.2.0",
       },
     },
     "packages/motif": {
@@ -197,7 +197,7 @@
       "name": "@hum2music/rendering",
       "version": "0.2.0",
       "dependencies": {
-        "@hum2music/expression": "workspace:*",
+        "@hum2music/expression": "^0.2.0",
       },
     },
     "packages/sdk": {
