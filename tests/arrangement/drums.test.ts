@@ -33,4 +33,16 @@ describe("generateDrumArrangement", () => {
     expect(notes.filter((n) => n.pitch === SNARE_PITCH).map((n) => n.startBeat)).toEqual([2]);
     expect(notes.filter((n) => n.pitch === CLOSED_HIHAT_PITCH)).toHaveLength(4);
   });
+
+  test("the hi-hat - the part playing on every eighth note - stays notably quieter than kick and snare", () => {
+    const notes = generateDrumArrangement([chord("C", 0)]);
+
+    const kickVelocity = notes.find((n) => n.pitch === KICK_PITCH)!.velocity;
+    const snareVelocity = notes.find((n) => n.pitch === SNARE_PITCH)!.velocity;
+    const hihatVelocity = notes.find((n) => n.pitch === CLOSED_HIHAT_PITCH)!.velocity;
+
+    expect(kickVelocity).toBeLessThanOrEqual(90);
+    expect(snareVelocity).toBeLessThanOrEqual(90);
+    expect(hihatVelocity).toBeLessThan(Math.min(kickVelocity, snareVelocity));
+  });
 });

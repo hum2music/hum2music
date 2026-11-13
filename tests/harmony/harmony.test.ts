@@ -1,5 +1,12 @@
 import { describe, expect, test } from "bun:test";
-import { analyzeHarmony, estimateKey, estimateTempo, quantizeToBeats, type TimedNote } from "@hum2music/harmony";
+import {
+  analyzeHarmony,
+  estimateKey,
+  estimateTempo,
+  quantizeToBeats,
+  selectPreferredTempo,
+  type TimedNote,
+} from "@hum2music/harmony";
 
 function quarterNotes(pitches: number[], bpm = 120, velocity = 90): TimedNote[] {
   const msPerBeat = 60000 / bpm;
@@ -11,12 +18,61 @@ function quarterNotes(pitches: number[], bpm = 120, velocity = 90): TimedNote[] 
   }));
 }
 
+/** Eighth-eighth-quarter repeated, at a 120 BPM quarter-note pulse: more eighth-note onsets than quarter-note ones, like a real melody. */
+function eighthEighthQuarterNotes(groupCount: number, bpm = 120): TimedNote[] {
+  const quarterMs = 60000 / bpm;
+  const eighthMs = quarterMs / 2;
+  const notes: TimedNote[] = [];
+  let timeMs = 0;
+  for (let group = 0; group < groupCount; group++) {
+    notes.push({ pitch: 60, startMs: timeMs, durationMs: eighthMs, velocity: 90 });
+    timeMs += eighthMs;
+    notes.push({ pitch: 62, startMs: timeMs, durationMs: eighthMs, velocity: 90 });
+    timeMs += eighthMs;
+    notes.push({ pitch: 64, startMs: timeMs, durationMs: quarterMs, velocity: 90 });
+    timeMs += quarterMs;
+  }
+  return notes;
+}
+
 describe("estimateTempo", () => {
   test("recovers the BPM of a steady quarter-note melody", () => {
     const notes = quarterNotes([60, 62, 64, 65, 67, 69, 71, 72], 120);
     const candidates = estimateTempo(notes);
     expect(candidates[0].bpm).toBe(120);
     expect(candidates[0].confidence).toBeCloseTo(1, 5);
+  });
+
+  test("the raw histogram's top candidate is the eighth-note rate for a mixed-rhythm melody", () => {
+    const notes = eighthEighthQuarterNotes(6, 120);
+    const candidates = estimateTempo(notes);
+    expect(candidates[0].bpm).toBe(240);
+  });
+});
+
+describe("selectPreferredTempo", () => {
+  test("folds the fastest candidate down to a still-plausible half-tempo relative", () => {
+    const notes = eighthEighthQuarterNotes(6, 120);
+    const candidates = estimateTempo(notes);
+    expect(selectPreferredTempo(candidates)).toBe(120);
+  });
+
+  test("keeps a steady quarter-note melody's tempo unchanged (no half candidate exists)", () => {
+    const notes = quarterNotes([60, 62, 64, 65, 67, 69, 71, 72], 120);
+    const candidates = estimateTempo(notes);
+    expect(selectPreferredTempo(candidates)).toBe(120);
+  });
+
+  test("keeps the fastest candidate when its half-tempo relative is too rare to trust", () => {
+    const candidates = [
+      { bpm: 240, confidence: 0.9 },
+      { bpm: 120, confidence: 0.05 }, // well under the 0.3 confidence-ratio floor
+    ];
+    expect(selectPreferredTempo(candidates)).toBe(240);
+  });
+
+  test("returns undefined for an empty candidate list", () => {
+    expect(selectPreferredTempo([])).toBeUndefined();
   });
 });
 
